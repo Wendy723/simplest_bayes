@@ -1,0 +1,49 @@
+# Dataset Creation
+
+```{r message=FALSE}
+library(knitr)
+library(PKPDmisc)
+library(tidyverse)
+library(mrgsolve)
+```
+
+```{r}
+models <- source("../models/models.R")$value
+```
+
+
+## Generate data for mrgsolve
+
+start with a baseline of having 50 individuals worth of data, can scale to 
+different amounts of individuals later
+
+```{r}
+NIDS <- 50
+```
+
+```{r}
+demogs <-  data_frame(ID = 1:NIDS)
+```
+
+```{r}
+for_dosing <- demogs %>% 
+                  mutate(
+                      CMT = 1, 
+                      EVID = 1,
+                      TIME = 0,
+                      AMT = 1000,
+                      RATE = 1000
+                  ) 
+```
+
+
+```{r }
+models$use("one_cmt_iv") %>% 
+    data_set(for_dosing) %>%
+    mrgsim(end = 24, delta = 0.25) %>% plot
+```
+
+
+```{r cache = FALSE}
+devtools::session_info()
+```
