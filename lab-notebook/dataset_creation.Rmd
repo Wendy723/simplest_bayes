@@ -75,6 +75,8 @@ simulated_data %>%
     base_theme() + scale_y_log10()
 ```
 
+## Real world sampling and LLOQ
+
 ```{r}
 
 sample_times <- c(1, 2, 4, 8, 16, 24)
@@ -83,6 +85,19 @@ sampled_data <- simulated_data %>%
     filter(TIME %in% sample_times, DV > LLOQ) 
 
 ```
+
+Show which, if any, timepoints have bql values and determine percent bql
+
+```{r}
+sampled_data %>%
+    count(TIME) %>% 
+    mutate(baseline = first(n),
+           perc_bql = 100 - n/baseline*100) %>%
+    filter(perc_bql > 0) %>% 
+    select(TIME, perc_bql) %>% kable()
+```
+
+## IPRED and DV vs TIME for all individuals at sampled times
 
 ```{r}
 list_plots <- sampled_data %>%
