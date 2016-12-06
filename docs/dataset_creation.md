@@ -140,6 +140,8 @@ simulated_data %>%
 
 <img src="dataset_creation_files/figure-html/unnamed-chunk-12-1.png" width="672" />
 
+## Real world sampling and LLOQ
+
 
 ```r
 
@@ -148,6 +150,26 @@ LLOQ <- 0.1
 sampled_data <- simulated_data %>% 
     filter(TIME %in% sample_times, DV > LLOQ) 
 ```
+
+Show which, if any, timepoints have bql values and determine percent bql
+
+
+```r
+sampled_data %>%
+    count(TIME) %>% 
+    mutate(baseline = first(n),
+           perc_bql = 100 - n/baseline*100) %>%
+    filter(perc_bql > 0) %>% 
+    select(TIME, perc_bql) %>% kable()
+```
+
+
+
+ TIME   perc_bql
+-----  ---------
+   24         14
+
+## IPRED and DV vs TIME for all individuals at sampled times
 
 
 ```r
@@ -167,17 +189,17 @@ print_plots(list_plots)
 
 
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-14-1.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-15-1.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-14-2.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-15-2.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-14-3.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-15-3.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-14-4.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-15-4.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-14-5.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-15-5.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-14-6.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-15-6.png" width="672" />
 
 ```
 #> [[1]]

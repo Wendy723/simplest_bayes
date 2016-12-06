@@ -105,6 +105,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="1.1" data-path="dataset-creation.html"><a href="dataset-creation.html#generate-data-for-mrgsolve"><i class="fa fa-check"></i><b>1.1</b> Generate data for mrgsolve</a></li>
 <li class="chapter" data-level="1.2" data-path="dataset-creation.html"><a href="dataset-creation.html#model-details"><i class="fa fa-check"></i><b>1.2</b> Model Details</a></li>
 <li class="chapter" data-level="1.3" data-path="dataset-creation.html"><a href="dataset-creation.html#predicted-profiles"><i class="fa fa-check"></i><b>1.3</b> Predicted Profiles</a></li>
+<li class="chapter" data-level="1.4" data-path="dataset-creation.html"><a href="dataset-creation.html#real-world-sampling-and-lloq"><i class="fa fa-check"></i><b>1.4</b> Real world sampling and LLOQ</a></li>
+<li class="chapter" data-level="1.5" data-path="dataset-creation.html"><a href="dataset-creation.html#ipred-and-dv-vs-time-for-all-individuals-at-sampled-times"><i class="fa fa-check"></i><b>1.5</b> IPRED and DV vs TIME for all individuals at sampled times</a></li>
 </ul></li>
 </ul>
 
@@ -274,11 +276,38 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">size =</span> <span class="fl">1.05</span>, <span class="dt">alpha =</span> <span class="fl">0.8</span>) +<span class="st"> </span><span class="kw">theme_bw</span>() +
 <span class="st">    </span><span class="kw">base_theme</span>() +<span class="st"> </span><span class="kw">scale_y_log10</span>()</code></pre></div>
 <p><img src="dataset_creation_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="real-world-sampling-and-lloq" class="section level2">
+<h2><span class="header-section-number">1.4</span> Real world sampling and LLOQ</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
 sample_times &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">16</span>, <span class="dv">24</span>)
 LLOQ &lt;-<span class="st"> </span><span class="fl">0.1</span>
 sampled_data &lt;-<span class="st"> </span>simulated_data %&gt;%<span class="st"> </span>
 <span class="st">    </span><span class="kw">filter</span>(TIME %in%<span class="st"> </span>sample_times, DV &gt;<span class="st"> </span>LLOQ) </code></pre></div>
+<p>Show which, if any, timepoints have bql values and determine percent bql</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sampled_data %&gt;%
+<span class="st">    </span><span class="kw">count</span>(TIME) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">baseline =</span> <span class="kw">first</span>(n),
+           <span class="dt">perc_bql =</span> <span class="dv">100</span> -<span class="st"> </span>n/baseline*<span class="dv">100</span>) %&gt;%
+<span class="st">    </span><span class="kw">filter</span>(perc_bql &gt;<span class="st"> </span><span class="dv">0</span>) %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">select</span>(TIME, perc_bql) %&gt;%<span class="st"> </span><span class="kw">kable</span>()</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">TIME</th>
+<th align="right">perc_bql</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">24</td>
+<td align="right">14</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="ipred-and-dv-vs-time-for-all-individuals-at-sampled-times" class="section level2">
+<h2><span class="header-section-number">1.5</span> IPRED and DV vs TIME for all individuals at sampled times</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">list_plots &lt;-<span class="st"> </span>sampled_data %&gt;%
 <span class="st">    </span><span class="kw">mutate</span>(<span class="dt">PNUM =</span> <span class="kw">ids_per_plot</span>(ID)) %&gt;%
 <span class="st">    </span><span class="kw">split</span>(.$PNUM) %&gt;%
@@ -291,12 +320,12 @@ sampled_data &lt;-<span class="st"> </span>simulated_data %&gt;%<span class="st"
     )
 
 <span class="kw">print_plots</span>(list_plots)</code></pre></div>
-<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
-<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-2.png" width="672" /></p>
-<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-3.png" width="672" /></p>
-<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-4.png" width="672" /></p>
-<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-5.png" width="672" /></p>
-<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-6.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-15-2.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-15-3.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-15-4.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-15-5.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-15-6.png" width="672" /></p>
 <pre><code>#&gt; [[1]]
 #&gt; NULL
 #&gt; 
