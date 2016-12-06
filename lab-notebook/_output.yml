@@ -1,0 +1,9 @@
+bookdown::gitbook:
+  config:
+    toc:
+      collapse: section
+    edit:
+      link: https://github.com/dpastoor/simplest_bayes/edit/master/%s
+      text: "Edit"
+    sharing: no
+  css: simplest_bayes.css
