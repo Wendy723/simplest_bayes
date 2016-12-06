@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Simplest Bayesian Example</title>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta name="description" content="simplest example of a Bayesian NLME analysis">
+  <meta name="generator" content="bookdown 0.2 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Simplest Bayesian Example" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="http://www.devinpastoor.com/simplest_bayes/" />
+  
+  <meta property="og:description" content="simplest example of a Bayesian NLME analysis" />
+  <meta name="github-repo" content="dpastoor/simplest_bayes" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Simplest Bayesian Example" />
+  <meta name="twitter:site" content="@devinpastoor" />
+  <meta name="twitter:description" content="simplest example of a Bayesian NLME analysis" />
+  
+
+<meta name="author" content="Devin Pastoor">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="index.html">
+
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="simplest_bayes.css" type="text/css" />
+</head>
+
+<body>
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Welcome</a></li>
+<li class="chapter" data-level="1" data-path="dataset-creation.html"><a href="dataset-creation.html"><i class="fa fa-check"></i><b>1</b> Dataset Creation</a><ul>
+<li class="chapter" data-level="1.1" data-path="dataset-creation.html"><a href="dataset-creation.html#generate-data-for-mrgsolve"><i class="fa fa-check"></i><b>1.1</b> Generate data for mrgsolve</a></li>
+<li class="chapter" data-level="1.2" data-path="dataset-creation.html"><a href="dataset-creation.html#model-details"><i class="fa fa-check"></i><b>1.2</b> Model Details</a></li>
+<li class="chapter" data-level="1.3" data-path="dataset-creation.html"><a href="dataset-creation.html#predicted-profiles"><i class="fa fa-check"></i><b>1.3</b> Predicted Profiles</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Simplest Bayesian Example</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="dataset-creation" class="section level1">
+<h1><span class="header-section-number">1</span> Dataset Creation</h1>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(knitr)
+<span class="kw">library</span>(PKPDmisc)
+<span class="kw">library</span>(tidyverse)
+<span class="kw">library</span>(mrgsolve)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">source</span>(<span class="st">&quot;../scripts/model_details.R&quot;</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">models &lt;-<span class="st"> </span><span class="kw">source</span>(<span class="st">&quot;../models/models.R&quot;</span>)$value
+<span class="co">#&gt; model dir set to C:/Users/devin/Documents/Repos/simplest_bayes/models</span>
+<span class="co">#&gt; cache location set to C:\Users\devin\Documents\Repos\simplest_bayes\models\.modelcache</span>
+<span class="co">#&gt; Loading model from cache.</span></code></pre></div>
+<div id="generate-data-for-mrgsolve" class="section level2">
+<h2><span class="header-section-number">1.1</span> Generate data for mrgsolve</h2>
+<p>start with a baseline of having 50 individuals worth of data, can scale to different amounts of individuals later</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">NIDS &lt;-<span class="st"> </span><span class="dv">50</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">demogs &lt;-<span class="st">  </span><span class="kw">data_frame</span>(<span class="dt">ID =</span> <span class="dv">1</span>:NIDS)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">for_dosing &lt;-<span class="st"> </span>demogs %&gt;%<span class="st"> </span>
+<span class="st">                  </span><span class="kw">mutate</span>(
+                      <span class="dt">CMT =</span> <span class="dv">1</span>, 
+                      <span class="dt">EVID =</span> <span class="dv">1</span>,
+                      <span class="dt">TIME =</span> <span class="dv">0</span>,
+                      <span class="dt">AMT =</span> <span class="dv">1000</span>,
+                      <span class="dt">RATE =</span> <span class="dv">1000</span>
+                  ) </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">one_cmt_iv &lt;-<span class="st"> </span>models$<span class="kw">use</span>(<span class="st">&quot;one_cmt_iv&quot;</span>)</code></pre></div>
+</div>
+<div id="model-details" class="section level2">
+<h2><span class="header-section-number">1.2</span> Model Details</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mrgsolve::<span class="kw">see</span>(one_cmt_iv)
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Model file:  one_cmt_iv.cpp </span>
+<span class="co">#&gt;  [PARAM] @annotated</span>
+<span class="co">#&gt;  CL  : 4   : Clearance (L/hr)</span>
+<span class="co">#&gt;  V   : 35  : Volume (L) </span>
+<span class="co">#&gt;  </span>
+<span class="co">#&gt;  </span>
+<span class="co">#&gt;  [CMT] @annotated</span>
+<span class="co">#&gt;  CENT : Central compartment (mg)</span>
+<span class="co">#&gt;  </span>
+<span class="co">#&gt;  [PKMODEL]</span>
+<span class="co">#&gt;  ncmt=1, trans=11</span>
+<span class="co">#&gt;  </span>
+<span class="co">#&gt;  [MAIN]</span>
+<span class="co">#&gt;  double CLi = CL*exp(nCL);</span>
+<span class="co">#&gt;  double Vi = V*exp(nV);</span>
+<span class="co">#&gt;  </span>
+<span class="co">#&gt;    </span>
+<span class="co">#&gt;  [OMEGA] @annotated @correlation @block</span>
+<span class="co">#&gt;  nCL : 0.1     : Random effect on CL</span>
+<span class="co">#&gt;  nV  : 0.4 0.04 : Random effect on V</span>
+<span class="co">#&gt;      </span>
+<span class="co">#&gt;  [SIGMA] @annotated</span>
+<span class="co">#&gt;  PROP : 0.04 : Proportional error</span>
+<span class="co">#&gt;  // so don&#39;t get into issues with estimating via multiplicative error only</span>
+<span class="co">#&gt;  ADD  : 0.5 : Additive residual error</span>
+<span class="co">#&gt;  </span>
+<span class="co">#&gt;  [TABLE]</span>
+<span class="co">#&gt;  double IPRED = CENT/Vi;</span>
+<span class="co">#&gt;  double DV = CENT/Vi*(1+PROP) + ADD;</span>
+<span class="co">#&gt;  </span>
+<span class="co">#&gt;  [CAPTURE] @annotated</span>
+<span class="co">#&gt;  DV    : plasma concentration (mg/L)</span>
+<span class="co">#&gt;  IPRED : Individual predicted plasma concentration (mg/L)</span>
+<span class="co">#&gt;  CLi   : Individual Clearance (L/hr)</span>
+<span class="co">#&gt;  Vi    : Individual Volume (L)</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">one_cmt_iv %&gt;%<span class="st"> </span>
+<span class="st">    </span>model_details %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">filter</span>(block !=<span class="st"> &quot;CAPTURE&quot;</span>) %&gt;%
+<span class="st">    </span><span class="kw">kable</span>()</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">block</th>
+<th align="left">name</th>
+<th align="left">descr</th>
+<th align="left">unit</th>
+<th align="left">options</th>
+<th align="right">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">PARAM</td>
+<td align="left">CL</td>
+<td align="left">Clearance</td>
+<td align="left">L/hr</td>
+<td align="left">.</td>
+<td align="right">4.00</td>
+</tr>
+<tr class="even">
+<td align="left">PARAM</td>
+<td align="left">V</td>
+<td align="left">Volume</td>
+<td align="left">L</td>
+<td align="left">.</td>
+<td align="right">35.00</td>
+</tr>
+<tr class="odd">
+<td align="left">CMT</td>
+<td align="left">CENT</td>
+<td align="left">Central compartment</td>
+<td align="left">mg</td>
+<td align="left">.</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">OMEGA</td>
+<td align="left">nCL</td>
+<td align="left">Random effect on CL</td>
+<td align="left">.</td>
+<td align="left">.</td>
+<td align="right">0.10</td>
+</tr>
+<tr class="odd">
+<td align="left">OMEGA</td>
+<td align="left">nV</td>
+<td align="left">Random effect on V</td>
+<td align="left">.</td>
+<td align="left">.</td>
+<td align="right">0.04</td>
+</tr>
+<tr class="even">
+<td align="left">SIGMA</td>
+<td align="left">PROP</td>
+<td align="left">Proportional error</td>
+<td align="left">.</td>
+<td align="left">.</td>
+<td align="right">0.04</td>
+</tr>
+<tr class="odd">
+<td align="left">SIGMA</td>
+<td align="left">ADD</td>
+<td align="left">Additive residual error</td>
+<td align="left">.</td>
+<td align="left">.</td>
+<td align="right">0.50</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">simulated_data &lt;-<span class="st"> </span>one_cmt_iv %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">data_set</span>(for_dosing) %&gt;%
+<span class="st">    </span><span class="kw">mrgsim</span>(<span class="dt">end =</span> <span class="dv">24</span>, <span class="dt">delta =</span> <span class="fl">0.25</span>) %&gt;%<span class="st"> </span>as_data_frame</code></pre></div>
+</div>
+<div id="predicted-profiles" class="section level2">
+<h2><span class="header-section-number">1.3</span> Predicted Profiles</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">simulated_data %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">filter</span>(IPRED &gt;<span class="st"> </span><span class="fl">0.1</span>) %&gt;%
+<span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> TIME, <span class="dt">y =</span> IPRED, <span class="dt">group =</span> ID)) +
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">size =</span> <span class="fl">1.05</span>, <span class="dt">alpha =</span> <span class="fl">0.8</span>) +<span class="st"> </span><span class="kw">theme_bw</span>() +
+<span class="st">    </span><span class="kw">base_theme</span>() +<span class="st"> </span><span class="kw">scale_y_log10</span>()</code></pre></div>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+sample_times &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">16</span>, <span class="dv">24</span>)
+LLOQ &lt;-<span class="st"> </span><span class="fl">0.1</span>
+sampled_data &lt;-<span class="st"> </span>simulated_data %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">filter</span>(TIME %in%<span class="st"> </span>sample_times, DV &gt;<span class="st"> </span>LLOQ) </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">list_plots &lt;-<span class="st"> </span>sampled_data %&gt;%
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">PNUM =</span> <span class="kw">ids_per_plot</span>(ID)) %&gt;%
+<span class="st">    </span><span class="kw">split</span>(.$PNUM) %&gt;%
+<span class="st">    </span><span class="kw">map</span>(~<span class="st"> </span>
+<span class="st">    </span><span class="kw">ggplot</span>(., <span class="kw">aes</span>(<span class="dt">x =</span> TIME, <span class="dt">y =</span> IPRED, <span class="dt">group =</span> ID)) +
+<span class="st">    </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">y =</span> DV), <span class="dt">color =</span> <span class="st">&quot;blue&quot;</span>) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">size =</span> <span class="fl">1.05</span>, <span class="dt">alpha =</span> <span class="fl">0.8</span>) +<span class="st"> </span><span class="kw">theme_bw</span>() +
+<span class="st">    </span><span class="kw">base_theme</span>() +<span class="st"> </span><span class="kw">facet_wrap</span>(~ID) +
+<span class="st">        </span><span class="kw">scale_y_log10</span>()
+    )
+
+<span class="kw">print_plots</span>(list_plots)</code></pre></div>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-2.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-3.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-4.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-5.png" width="672" /></p>
+<p><img src="dataset_creation_files/figure-html/unnamed-chunk-14-6.png" width="672" /></p>
+<pre><code>#&gt; [[1]]
+#&gt; NULL
+#&gt; 
+#&gt; [[2]]
+#&gt; NULL
+#&gt; 
+#&gt; [[3]]
+#&gt; NULL
+#&gt; 
+#&gt; [[4]]
+#&gt; NULL
+#&gt; 
+#&gt; [[5]]
+#&gt; NULL
+#&gt; 
+#&gt; [[6]]
+#&gt; NULL</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">devtools::<span class="kw">session_info</span>()
+<span class="co">#&gt; Session info --------------------------------------------------------------</span>
+<span class="co">#&gt;  setting  value                       </span>
+<span class="co">#&gt;  version  R version 3.3.2 (2016-10-31)</span>
+<span class="co">#&gt;  system   x86_64, mingw32             </span>
+<span class="co">#&gt;  ui       RTerm                       </span>
+<span class="co">#&gt;  language (EN)                        </span>
+<span class="co">#&gt;  collate  English_United States.1252  </span>
+<span class="co">#&gt;  tz       America/New_York            </span>
+<span class="co">#&gt;  date     2016-12-06</span>
+<span class="co">#&gt; Packages ------------------------------------------------------------------</span>
+<span class="co">#&gt;  package       * version     date      </span>
+<span class="co">#&gt;  assertthat      0.1         2013-12-06</span>
+<span class="co">#&gt;  backports       1.0.4       2016-10-24</span>
+<span class="co">#&gt;  bookdown        0.2         2016-11-12</span>
+<span class="co">#&gt;  codetools       0.2-15      2016-10-05</span>
+<span class="co">#&gt;  colorspace      1.2-7       2016-10-11</span>
+<span class="co">#&gt;  DBI             0.5-1       2016-09-10</span>
+<span class="co">#&gt;  devtools        1.12.0      2016-06-24</span>
+<span class="co">#&gt;  digest          0.6.10      2016-08-02</span>
+<span class="co">#&gt;  dplyr         * 0.5.0       2016-06-24</span>
+<span class="co">#&gt;  evaluate        0.10        2016-10-11</span>
+<span class="co">#&gt;  ggplot2       * 2.1.0.9001  2016-11-07</span>
+<span class="co">#&gt;  gtable          0.2.0       2016-02-26</span>
+<span class="co">#&gt;  highr           0.6         2016-05-09</span>
+<span class="co">#&gt;  htmltools       0.3.5       2016-03-21</span>
+<span class="co">#&gt;  httpuv          1.3.3       2015-08-04</span>
+<span class="co">#&gt;  knitr         * 1.15        2016-11-09</span>
+<span class="co">#&gt;  labeling        0.3         2014-08-23</span>
+<span class="co">#&gt;  lazyeval        0.2.0       2016-06-12</span>
+<span class="co">#&gt;  magrittr        1.5         2014-11-22</span>
+<span class="co">#&gt;  memoise         1.0.0       2016-01-29</span>
+<span class="co">#&gt;  mime            0.5         2016-07-07</span>
+<span class="co">#&gt;  miniUI          0.1.1       2016-01-15</span>
+<span class="co">#&gt;  mrgsolve      * 0.7.6.9029  2016-12-06</span>
+<span class="co">#&gt;  munsell         0.4.3       2016-02-13</span>
+<span class="co">#&gt;  overseer      * 0.0.1       2016-12-06</span>
+<span class="co">#&gt;  PKPDmisc      * 0.4.4.9000  2016-11-02</span>
+<span class="co">#&gt;  plyr            1.8.4       2016-06-08</span>
+<span class="co">#&gt;  purrr         * 0.2.2       2016-06-18</span>
+<span class="co">#&gt;  R6              2.2.0       2016-10-05</span>
+<span class="co">#&gt;  Rcpp            0.12.8      2016-11-17</span>
+<span class="co">#&gt;  RcppArmadillo   0.7.500.0.0 2016-10-22</span>
+<span class="co">#&gt;  readr         * 1.0.0       2016-08-03</span>
+<span class="co">#&gt;  rmarkdown       1.2         2016-11-21</span>
+<span class="co">#&gt;  rprojroot       1.1         2016-10-29</span>
+<span class="co">#&gt;  scales          0.4.0.9003  2016-11-07</span>
+<span class="co">#&gt;  shiny           0.14.2      2016-11-01</span>
+<span class="co">#&gt;  stringi         1.1.2       2016-10-01</span>
+<span class="co">#&gt;  stringr         1.1.0       2016-08-19</span>
+<span class="co">#&gt;  tibble        * 1.2         2016-08-26</span>
+<span class="co">#&gt;  tidyr         * 0.6.0       2016-08-12</span>
+<span class="co">#&gt;  tidyverse     * 1.0.0       2016-09-09</span>
+<span class="co">#&gt;  withr           1.0.2       2016-06-20</span>
+<span class="co">#&gt;  xtable          1.8-2       2016-02-05</span>
+<span class="co">#&gt;  yaml            2.1.13      2014-06-12</span>
+<span class="co">#&gt;  source                                       </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  Github (hadley/ggplot2@70c3d69)              </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  Github (metrumresearchgroup/mrgsolve@d92f31a)</span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  local                                        </span>
+<span class="co">#&gt;  Github (dpastoor/PKPDmisc@beae2a6)           </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  Github (hadley/scales@d58d83a)               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)                               </span>
+<span class="co">#&gt;  CRAN (R 3.3.2)</span></code></pre></div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": false,
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/dpastoor/simplest_bayes/edit/master/dataset_creation.Rmd",
+"text": "Edit"
+},
+"download": null,
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
