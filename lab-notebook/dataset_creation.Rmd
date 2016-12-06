@@ -8,6 +8,10 @@ library(mrgsolve)
 ```
 
 ```{r}
+source("../scripts/model_details.R")
+```
+
+```{r}
 models <- source("../models/models.R")$value
 ```
 
@@ -36,11 +40,63 @@ for_dosing <- demogs %>%
                   ) 
 ```
 
+```{r}
+one_cmt_iv <- models$use("one_cmt_iv")
+```
+
+
+## Model Details
+
+```{r}
+mrgsolve::see(one_cmt_iv)
+```
+
+```{r results='asis'}
+one_cmt_iv %>% 
+    model_details %>% 
+    filter(block != "CAPTURE") %>%
+    kable()
+```
+
 
 ```{r }
-models$use("one_cmt_iv") %>% 
+simulated_data <- one_cmt_iv %>% 
     data_set(for_dosing) %>%
-    mrgsim(end = 24, delta = 0.25) %>% plot
+    mrgsim(end = 24, delta = 0.25) %>% as_data_frame
+```
+
+## Predicted Profiles
+
+```{r}
+simulated_data %>% 
+    filter(IPRED > 0.1) %>%
+    ggplot(aes(x = TIME, y = IPRED, group = ID)) +
+    geom_line(size = 1.05, alpha = 0.8) + theme_bw() +
+    base_theme() + scale_y_log10()
+```
+
+```{r}
+
+sample_times <- c(1, 2, 4, 8, 16, 24)
+LLOQ <- 0.1
+sampled_data <- simulated_data %>% 
+    filter(TIME %in% sample_times, DV > LLOQ) 
+
+```
+
+```{r}
+list_plots <- sampled_data %>%
+    mutate(PNUM = ids_per_plot(ID)) %>%
+    split(.$PNUM) %>%
+    map(~ 
+    ggplot(., aes(x = TIME, y = IPRED, group = ID)) +
+    geom_point(aes(y = DV), color = "blue") + 
+    geom_line(size = 1.05, alpha = 0.8) + theme_bw() +
+    base_theme() + facet_wrap(~ID) +
+        scale_y_log10()
+    )
+
+print_plots(list_plots)
 ```
 
 
