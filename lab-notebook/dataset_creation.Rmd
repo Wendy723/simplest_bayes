@@ -51,7 +51,7 @@ one_cmt_iv <- models$use("one_cmt_iv")
 mrgsolve::see(one_cmt_iv)
 ```
 
-```{r results='asis'}
+```{r }
 one_cmt_iv %>% 
     model_details %>% 
     filter(block != "CAPTURE") %>%
