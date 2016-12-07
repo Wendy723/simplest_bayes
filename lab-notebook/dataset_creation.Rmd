@@ -114,7 +114,28 @@ list_plots <- sampled_data %>%
 print_plots(list_plots)
 ```
 
+## Prepare for nonmem
+
+```{r}
+nm_dat <- sampled_data %>% select(ID, TIME, DV) %>%
+    mutate(CMT = 1,
+           EVID = 0
+           ) %>%
+    bind_rows(for_dosing) %>%
+        arrange(ID, TIME, desc(EVID))
+```
+
+```{r}
+kable(head(nm_dat))
+```
+
+```{r}
+write_nonmem(nm_dat, "../modeling/mdata/simple_nocovar_50id_6tp.csv")
+```
+
 
 ```{r cache = FALSE}
-devtools::session_info()
+session_details <- devtools::session_info()
+session_details$platform
+kable(session_details$packages)
 ```
