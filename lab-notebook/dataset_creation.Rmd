@@ -4,7 +4,7 @@
 library(knitr)
 library(PKPDmisc)
 library(tidyverse)
-library(mrgsolve)
+library(mrgsolve) 
 ```
 
 ```{r}
@@ -65,6 +65,24 @@ simulated_data <- one_cmt_iv %>%
     mrgsim(end = 24, delta = 0.25) %>% as_data_frame
 ```
 
+## Distribution of peak and trough values
+
+* 'peak' defined as 1 hr post infusion and trough 1 hour prior to when next dose would begin
+```{r}
+simulated_data %>% 
+    filter(TIME %in% c(2, 23)) %>% 
+    mutate(DV = ifelse(DV < 0, 0, DV)) %>%
+    select(ID, DV) %>%
+    group_by(ID) %>%
+    summarize_all(funs(min, max)) %>%
+    gather(sample, value, -ID) %>%
+    ggplot(aes(x = value)) + 
+    geom_density() +
+    facet_wrap(~sample, scales = "free") +
+    theme_bw() +
+    base_theme()
+```
+
 ## Predicted Profiles
 
 ```{r}
@@ -79,7 +97,7 @@ simulated_data %>%
 
 ```{r}
 
-sample_times <- c(1, 2, 4, 8, 16, 24)
+sample_times <- c(2, 4, 8, 16, 24)
 LLOQ <- 0.1
 sampled_data <- simulated_data %>% 
     filter(TIME %in% sample_times, DV > LLOQ) 

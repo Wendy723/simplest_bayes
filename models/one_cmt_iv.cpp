@@ -1,5 +1,5 @@
 [PARAM] @annotated
-CL  : 4   : Clearance (L/hr)
+CL  : 3   : Clearance (L/hr)
 V   : 35  : Volume (L) 
 
 
@@ -21,7 +21,7 @@ nV  : 0.4 0.04 : Random effect on V
 [SIGMA] @annotated
 PROP : 0.04 : Proportional error
 // so don't get into issues with estimating via multiplicative error only
-ADD  : 0.5 : Additive residual error
+ADD  : 0.1 : Additive residual error
 
 [TABLE]
 double IPRED = CENT/Vi;
