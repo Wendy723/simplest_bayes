@@ -6,7 +6,7 @@
 library(knitr)
 library(PKPDmisc)
 library(tidyverse)
-library(mrgsolve)
+library(mrgsolve) 
 ```
 
 
@@ -64,7 +64,7 @@ mrgsolve::see(one_cmt_iv)
 #> 
 #> Model file:  one_cmt_iv.cpp 
 #>  [PARAM] @annotated
-#>  CL  : 4   : Clearance (L/hr)
+#>  CL  : 3   : Clearance (L/hr)
 #>  V   : 35  : Volume (L) 
 #>  
 #>  
@@ -86,7 +86,7 @@ mrgsolve::see(one_cmt_iv)
 #>  [SIGMA] @annotated
 #>  PROP : 0.04 : Proportional error
 #>  // so don't get into issues with estimating via multiplicative error only
-#>  ADD  : 0.5 : Additive residual error
+#>  ADD  : 0.1 : Additive residual error
 #>  
 #>  [TABLE]
 #>  double IPRED = CENT/Vi;
@@ -111,13 +111,13 @@ one_cmt_iv %>%
 
 block   name   descr                     unit   options    value
 ------  -----  ------------------------  -----  --------  ------
-PARAM   CL     Clearance                 L/hr   .           4.00
+PARAM   CL     Clearance                 L/hr   .           3.00
 PARAM   V      Volume                    L      .          35.00
 CMT     CENT   Central compartment       mg     .           0.00
 OMEGA   nCL    Random effect on CL       .      .           0.10
 OMEGA   nV     Random effect on V        .      .           0.04
 SIGMA   PROP   Proportional error        .      .           0.04
-SIGMA   ADD    Additive residual error   .      .           0.50
+SIGMA   ADD    Additive residual error   .      .           0.10
 
 
 
@@ -126,6 +126,27 @@ simulated_data <- one_cmt_iv %>%
     data_set(for_dosing) %>%
     mrgsim(end = 24, delta = 0.25) %>% as_data_frame
 ```
+
+## Distribution of peak and trough values
+
+* 'peak' defined as 1 hr post infusion and trough 1 hour prior to when next dose would begin
+
+```r
+simulated_data %>% 
+    filter(TIME %in% c(2, 23)) %>% 
+    mutate(DV = ifelse(DV < 0, 0, DV)) %>%
+    select(ID, DV) %>%
+    group_by(ID) %>%
+    summarize_all(funs(min, max)) %>%
+    gather(sample, value, -ID) %>%
+    ggplot(aes(x = value)) + 
+    geom_density() +
+    facet_wrap(~sample, scales = "free") +
+    theme_bw() +
+    base_theme()
+```
+
+<img src="dataset_creation_files/figure-html/unnamed-chunk-12-1.png" width="672" />
 
 ## Predicted Profiles
 
@@ -138,14 +159,14 @@ simulated_data %>%
     base_theme() + scale_y_log10()
 ```
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-12-1.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-13-1.png" width="672" />
 
 ## Real world sampling and LLOQ
 
 
 ```r
 
-sample_times <- c(1, 2, 4, 8, 16, 24)
+sample_times <- c(2, 4, 8, 16, 24)
 LLOQ <- 0.1
 sampled_data <- simulated_data %>% 
     filter(TIME %in% sample_times, DV > LLOQ) 
@@ -167,7 +188,6 @@ sampled_data %>%
 
  TIME   perc_bql
 -----  ---------
-   24         14
 
 ## IPRED and DV vs TIME for all individuals at sampled times
 
@@ -189,17 +209,17 @@ print_plots(list_plots)
 
 
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-15-1.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-16-1.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-15-2.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-16-2.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-15-3.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-16-3.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-15-4.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-16-4.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-15-5.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-16-5.png" width="672" />
 
-<img src="dataset_creation_files/figure-html/unnamed-chunk-15-6.png" width="672" />
+<img src="dataset_creation_files/figure-html/unnamed-chunk-16-6.png" width="672" />
 
 ```
 #> [[1]]
@@ -221,11 +241,44 @@ print_plots(list_plots)
 #> NULL
 ```
 
+## Prepare for nonmem
 
 
 ```r
-devtools::session_info()
-#> Session info --------------------------------------------------------------
+nm_dat <- sampled_data %>% select(ID, TIME, DV) %>%
+    mutate(CMT = 1,
+           EVID = 0
+           ) %>%
+    bind_rows(for_dosing) %>%
+        arrange(ID, TIME, desc(EVID))
+```
+
+
+```r
+kable(head(nm_dat))
+```
+
+
+
+ ID   TIME      DV   CMT   EVID    AMT   RATE
+---  -----  ------  ----  -----  -----  -----
+  1      0      NA     1      1   1000   1000
+  1      2   22.40     1      0     NA     NA
+  1      4   18.59     1      0     NA     NA
+  1      8    7.88     1      0     NA     NA
+  1     16   10.20     1      0     NA     NA
+  1     24    2.70     1      0     NA     NA
+
+
+```r
+write_nonmem(nm_dat, "../modeling/mdata/simple_nocovar_50id_6tp.csv")
+```
+
+
+
+```r
+session_details <- devtools::session_info()
+session_details$platform
 #>  setting  value                       
 #>  version  R version 3.3.2 (2016-10-31)
 #>  system   x86_64, mingw32             
@@ -233,96 +286,55 @@ devtools::session_info()
 #>  language (EN)                        
 #>  collate  English_United States.1252  
 #>  tz       America/New_York            
-#>  date     2016-12-06
-#> Packages ------------------------------------------------------------------
-#>  package       * version     date      
-#>  assertthat      0.1         2013-12-06
-#>  backports       1.0.4       2016-10-24
-#>  bookdown        0.2         2016-11-12
-#>  codetools       0.2-15      2016-10-05
-#>  colorspace      1.2-7       2016-10-11
-#>  DBI             0.5-1       2016-09-10
-#>  devtools        1.12.0      2016-06-24
-#>  digest          0.6.10      2016-08-02
-#>  dplyr         * 0.5.0       2016-06-24
-#>  evaluate        0.10        2016-10-11
-#>  ggplot2       * 2.1.0.9001  2016-11-07
-#>  gtable          0.2.0       2016-02-26
-#>  highr           0.6         2016-05-09
-#>  htmltools       0.3.5       2016-03-21
-#>  httpuv          1.3.3       2015-08-04
-#>  knitr         * 1.15        2016-11-09
-#>  labeling        0.3         2014-08-23
-#>  lazyeval        0.2.0       2016-06-12
-#>  magrittr        1.5         2014-11-22
-#>  memoise         1.0.0       2016-01-29
-#>  mime            0.5         2016-07-07
-#>  miniUI          0.1.1       2016-01-15
-#>  mrgsolve      * 0.7.6.9029  2016-12-06
-#>  munsell         0.4.3       2016-02-13
-#>  overseer      * 0.0.1       2016-12-06
-#>  PKPDmisc      * 0.4.4.9000  2016-11-02
-#>  plyr            1.8.4       2016-06-08
-#>  purrr         * 0.2.2       2016-06-18
-#>  R6              2.2.0       2016-10-05
-#>  Rcpp            0.12.8      2016-11-17
-#>  RcppArmadillo   0.7.500.0.0 2016-10-22
-#>  readr         * 1.0.0       2016-08-03
-#>  rmarkdown       1.2         2016-11-21
-#>  rprojroot       1.1         2016-10-29
-#>  scales          0.4.0.9003  2016-11-07
-#>  shiny           0.14.2      2016-11-01
-#>  stringi         1.1.2       2016-10-01
-#>  stringr         1.1.0       2016-08-19
-#>  tibble        * 1.2         2016-08-26
-#>  tidyr         * 0.6.0       2016-08-12
-#>  tidyverse     * 1.0.0       2016-09-09
-#>  withr           1.0.2       2016-06-20
-#>  xtable          1.8-2       2016-02-05
-#>  yaml            2.1.13      2014-06-12
-#>  source                                       
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  Github (hadley/ggplot2@70c3d69)              
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  Github (metrumresearchgroup/mrgsolve@d92f31a)
-#>  CRAN (R 3.3.2)                               
-#>  local                                        
-#>  Github (dpastoor/PKPDmisc@beae2a6)           
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  Github (hadley/scales@d58d83a)               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)                               
-#>  CRAN (R 3.3.2)
+#>  date     2016-12-09
+knitr::kable(session_details$packages)
 ```
+
+
+
+package         *    version       date         source                                        
+--------------  ---  ------------  -----------  ----------------------------------------------
+assertthat           0.1           2013-12-06   CRAN (R 3.3.2)                                
+backports            1.0.4         2016-10-24   CRAN (R 3.3.2)                                
+bookdown             0.2           2016-11-12   CRAN (R 3.3.2)                                
+codetools            0.2-15        2016-10-05   CRAN (R 3.3.2)                                
+colorspace           1.2-7         2016-10-11   CRAN (R 3.3.2)                                
+DBI                  0.5-1         2016-09-10   CRAN (R 3.3.2)                                
+devtools             1.12.0        2016-06-24   CRAN (R 3.3.2)                                
+digest               0.6.10        2016-08-02   CRAN (R 3.3.2)                                
+dplyr           *    0.5.0         2016-06-24   CRAN (R 3.3.2)                                
+evaluate             0.10          2016-10-11   CRAN (R 3.3.2)                                
+ggplot2         *    2.1.0.9001    2016-11-07   Github (hadley/ggplot2@70c3d69)               
+gtable               0.2.0         2016-02-26   CRAN (R 3.3.2)                                
+highr                0.6           2016-05-09   CRAN (R 3.3.2)                                
+htmltools            0.3.5         2016-03-21   CRAN (R 3.3.2)                                
+httpuv               1.3.3         2015-08-04   CRAN (R 3.3.2)                                
+knitr           *    1.15          2016-11-09   CRAN (R 3.3.2)                                
+labeling             0.3           2014-08-23   CRAN (R 3.3.2)                                
+lazyeval             0.2.0         2016-06-12   CRAN (R 3.3.2)                                
+magrittr             1.5           2014-11-22   CRAN (R 3.3.2)                                
+memoise              1.0.0         2016-01-29   CRAN (R 3.3.2)                                
+mime                 0.5           2016-07-07   CRAN (R 3.3.2)                                
+miniUI               0.1.1         2016-01-15   CRAN (R 3.3.2)                                
+mrgsolve        *    0.7.6.9029    2016-12-06   Github (metrumresearchgroup/mrgsolve@d92f31a) 
+munsell              0.4.3         2016-02-13   CRAN (R 3.3.2)                                
+overseer        *    0.0.1         2016-12-06   local                                         
+PKPDmisc        *    0.4.4.9000    2016-11-02   Github (dpastoor/PKPDmisc@beae2a6)            
+plyr                 1.8.4         2016-06-08   CRAN (R 3.3.2)                                
+purrr           *    0.2.2         2016-06-18   CRAN (R 3.3.2)                                
+R6                   2.2.0         2016-10-05   CRAN (R 3.3.2)                                
+Rcpp                 0.12.8        2016-11-17   CRAN (R 3.3.2)                                
+RcppArmadillo        0.7.500.0.0   2016-10-22   CRAN (R 3.3.2)                                
+readr           *    1.0.0         2016-08-03   CRAN (R 3.3.2)                                
+rmarkdown            1.2           2016-11-21   CRAN (R 3.3.2)                                
+rprojroot            1.1           2016-10-29   CRAN (R 3.3.2)                                
+scales               0.4.0.9003    2016-11-07   Github (hadley/scales@d58d83a)                
+shiny                0.14.2        2016-11-01   CRAN (R 3.3.2)                                
+stringi              1.1.2         2016-10-01   CRAN (R 3.3.2)                                
+stringr              1.1.0         2016-08-19   CRAN (R 3.3.2)                                
+tibble          *    1.2           2016-08-26   CRAN (R 3.3.2)                                
+tidyr           *    0.6.0         2016-08-12   CRAN (R 3.3.2)                                
+tidyverse       *    1.0.0         2016-09-09   CRAN (R 3.3.2)                                
+withr                1.0.2         2016-06-20   CRAN (R 3.3.2)                                
+xtable               1.8-2         2016-02-05   CRAN (R 3.3.2)                                
+yaml                 2.1.13        2014-06-12   CRAN (R 3.3.2)                                

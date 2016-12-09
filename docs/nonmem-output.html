@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Simplest Bayesian Example</title>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta name="description" content="simplest example of a Bayesian NLME analysis">
+  <meta name="generator" content="bookdown 0.2 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Simplest Bayesian Example" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="http://www.devinpastoor.com/simplest_bayes/" />
+  
+  <meta property="og:description" content="simplest example of a Bayesian NLME analysis" />
+  <meta name="github-repo" content="dpastoor/simplest_bayes" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Simplest Bayesian Example" />
+  <meta name="twitter:site" content="@devinpastoor" />
+  <meta name="twitter:description" content="simplest example of a Bayesian NLME analysis" />
+  
+
+<meta name="author" content="Devin Pastoor">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="dataset-creation.html">
+
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+<link rel="stylesheet" href="simplest_bayes.css" type="text/css" />
+</head>
+
+<body>
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Welcome</a></li>
+<li class="chapter" data-level="1" data-path="dataset-creation.html"><a href="dataset-creation.html"><i class="fa fa-check"></i><b>1</b> Dataset Creation</a><ul>
+<li class="chapter" data-level="1.1" data-path="dataset-creation.html"><a href="dataset-creation.html#generate-data-for-mrgsolve"><i class="fa fa-check"></i><b>1.1</b> Generate data for mrgsolve</a></li>
+<li class="chapter" data-level="1.2" data-path="dataset-creation.html"><a href="dataset-creation.html#model-details"><i class="fa fa-check"></i><b>1.2</b> Model Details</a></li>
+<li class="chapter" data-level="1.3" data-path="dataset-creation.html"><a href="dataset-creation.html#distribution-of-peak-and-trough-values"><i class="fa fa-check"></i><b>1.3</b> Distribution of peak and trough values</a></li>
+<li class="chapter" data-level="1.4" data-path="dataset-creation.html"><a href="dataset-creation.html#predicted-profiles"><i class="fa fa-check"></i><b>1.4</b> Predicted Profiles</a></li>
+<li class="chapter" data-level="1.5" data-path="dataset-creation.html"><a href="dataset-creation.html#real-world-sampling-and-lloq"><i class="fa fa-check"></i><b>1.5</b> Real world sampling and LLOQ</a></li>
+<li class="chapter" data-level="1.6" data-path="dataset-creation.html"><a href="dataset-creation.html#ipred-and-dv-vs-time-for-all-individuals-at-sampled-times"><i class="fa fa-check"></i><b>1.6</b> IPRED and DV vs TIME for all individuals at sampled times</a></li>
+<li class="chapter" data-level="1.7" data-path="dataset-creation.html"><a href="dataset-creation.html#prepare-for-nonmem"><i class="fa fa-check"></i><b>1.7</b> Prepare for nonmem</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="nonmem-output.html"><a href="nonmem-output.html"><i class="fa fa-check"></i><b>2</b> NONMEM output</a><ul>
+<li class="chapter" data-level="2.1" data-path="nonmem-output.html"><a href="nonmem-output.html#foce-output"><i class="fa fa-check"></i><b>2.1</b> FOCE output</a><ul>
+<li class="chapter" data-level="2.1.1" data-path="nonmem-output.html"><a href="nonmem-output.html#output-previews"><i class="fa fa-check"></i><b>2.1.1</b> Output previews</a></li>
+<li class="chapter" data-level="2.1.2" data-path="nonmem-output.html"><a href="nonmem-output.html#visual-summaries"><i class="fa fa-check"></i><b>2.1.2</b> Visual summaries</a></li>
+</ul></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Simplest Bayesian Example</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="nonmem-output" class="section level1">
+<h1><span class="header-section-number">2</span> NONMEM output</h1>
+<div id="foce-output" class="section level2">
+<h2><span class="header-section-number">2.1</span> FOCE output</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(knitr)
+<span class="kw">library</span>(PKPDmisc)
+<span class="kw">library</span>(tidyverse)
+<span class="kw">library</span>(decorator)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">pallete &lt;-<span class="st"> </span>Pallete$<span class="kw">new</span>(<span class="st">&quot;material_design&quot;</span>)
+mcp &lt;-<span class="st"> </span>pallete$<span class="kw">colors</span>() </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sdtab1 &lt;-<span class="st"> </span><span class="kw">read_nonmem</span>(<span class="st">&quot;../modeling/sdtab001&quot;</span>)
+patab1 &lt;-<span class="st"> </span><span class="kw">read_nonmem</span>(<span class="st">&quot;../modeling/patab001&quot;</span>)</code></pre></div>
+<div id="output-previews" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Output previews</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">kable</span>(<span class="kw">head</span>(sdtab1))</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">ID</th>
+<th align="right">TIME</th>
+<th align="right">IPRED</th>
+<th align="right">DV</th>
+<th align="right">CWRES</th>
+<th align="right">PRED</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0.00</td>
+<td align="right">0.00</td>
+<td align="right">0.000</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">24.88</td>
+<td align="right">24.96</td>
+<td align="right">0.039</td>
+<td align="right">22.94</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">21.79</td>
+<td align="right">24.87</td>
+<td align="right">0.750</td>
+<td align="right">19.17</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">8</td>
+<td align="right">16.70</td>
+<td align="right">16.14</td>
+<td align="right">0.073</td>
+<td align="right">13.39</td>
+</tr>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">16</td>
+<td align="right">9.81</td>
+<td align="right">11.03</td>
+<td align="right">0.912</td>
+<td align="right">6.53</td>
+</tr>
+<tr class="even">
+<td align="right">1</td>
+<td align="right">24</td>
+<td align="right">5.77</td>
+<td align="right">6.33</td>
+<td align="right">0.783</td>
+<td align="right">3.18</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">kable</span>(<span class="kw">head</span>(patab1))</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="right">ID</th>
+<th align="right">CL</th>
+<th align="right">V</th>
+<th align="right">TVCL</th>
+<th align="right">TVV</th>
+<th align="right">nCL</th>
+<th align="right">nV</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">1</td>
+<td align="right">2.42</td>
+<td align="right">36.4</td>
+<td align="right">3.42</td>
+<td align="right">38.1</td>
+<td align="right">-0.347</td>
+<td align="right">-0.047</td>
+</tr>
+<tr class="even">
+<td align="right">2</td>
+<td align="right">2.99</td>
+<td align="right">43.2</td>
+<td align="right">3.42</td>
+<td align="right">38.1</td>
+<td align="right">-0.135</td>
+<td align="right">0.126</td>
+</tr>
+<tr class="odd">
+<td align="right">3</td>
+<td align="right">4.20</td>
+<td align="right">47.1</td>
+<td align="right">3.42</td>
+<td align="right">38.1</td>
+<td align="right">0.204</td>
+<td align="right">0.211</td>
+</tr>
+<tr class="even">
+<td align="right">4</td>
+<td align="right">3.50</td>
+<td align="right">30.8</td>
+<td align="right">3.42</td>
+<td align="right">38.1</td>
+<td align="right">0.024</td>
+<td align="right">-0.213</td>
+</tr>
+<tr class="odd">
+<td align="right">5</td>
+<td align="right">5.55</td>
+<td align="right">45.9</td>
+<td align="right">3.42</td>
+<td align="right">38.1</td>
+<td align="right">0.484</td>
+<td align="right">0.185</td>
+</tr>
+<tr class="even">
+<td align="right">6</td>
+<td align="right">2.82</td>
+<td align="right">38.0</td>
+<td align="right">3.42</td>
+<td align="right">38.1</td>
+<td align="right">-0.195</td>
+<td align="right">-0.003</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="visual-summaries" class="section level3">
+<h3><span class="header-section-number">2.1.2</span> Visual summaries</h3>
+<div id="parameter-values" class="section level4">
+<h4><span class="header-section-number">2.1.2.1</span> Parameter values</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">patab1 %&gt;%<span class="st"> </span>
+<span class="st">    </span><span class="kw">select</span>(ID:TVV) %&gt;%
+<span class="st">    </span><span class="kw">gather</span>(iparam, value, CL, V) %&gt;%
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">TVP =</span> <span class="kw">ifelse</span>(iparam ==<span class="st"> &quot;CL&quot;</span>, TVCL, TVV)) %&gt;%
+<span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> value, <span class="dt">group =</span> iparam)) +
+<span class="st">    </span><span class="kw">geom_density</span>() +<span class="st">  </span>
+<span class="st">    </span><span class="kw">geom_vline</span>(<span class="kw">aes</span>(<span class="dt">xintercept =</span> TVP), <span class="dt">color =</span> mcp$blue, <span class="dt">size =</span> <span class="fl">1.2</span>) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">facet_wrap</span>(~iparam, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) +<span class="st"> </span><span class="kw">theme_bw</span>() +
+<span class="st">    </span><span class="kw">base_theme</span>() +
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Individual parameter value&quot;</span>, <span class="dt">subtitle=</span><span class="st">&quot;blue lines represent population typical value&quot;</span>)</code></pre></div>
+<p><img src="foce_output_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="individual-diagnostic-plots" class="section level4">
+<h4><span class="header-section-number">2.1.2.2</span> Individual diagnostic plots</h4>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sdtab1 %&gt;%
+<span class="st">    </span><span class="kw">filter</span>(TIME &gt;<span class="dv">0</span>) %&gt;%
+<span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> TIME, <span class="dt">y =</span> CWRES)) +<span class="st"> </span><span class="kw">geom_point</span>() +
+<span class="st">    </span><span class="kw">geom_smooth</span>(<span class="dt">se =</span> <span class="ot">FALSE</span>, <span class="dt">color =</span> mcp$blue) +
+<span class="st">    </span><span class="kw">theme_bw</span>() +
+<span class="st">    </span><span class="kw">base_theme</span>() +
+<span class="st">    </span><span class="kw">geom_smooth</span>(<span class="kw">aes</span>(<span class="dt">y =</span> <span class="kw">abs</span>(CWRES)), <span class="dt">se =</span> F, <span class="dt">color =</span> mcp$red) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">geom_smooth</span>(<span class="kw">aes</span>(<span class="dt">y =</span> -<span class="kw">abs</span>(CWRES)), <span class="dt">se =</span> F, <span class="dt">color =</span> mcp$red) 
+<span class="co">#&gt; `geom_smooth()` using method = &#39;loess&#39;</span>
+<span class="co">#&gt; `geom_smooth()` using method = &#39;loess&#39;</span>
+<span class="co">#&gt; `geom_smooth()` using method = &#39;loess&#39;</span></code></pre></div>
+<p><img src="foce_output_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sdtab1 %&gt;%
+<span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> IPRED, <span class="dt">y =</span> DV)) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">geom_abline</span>(<span class="dt">color =</span> mcp$blue, <span class="dt">size =</span> <span class="fl">1.1</span>) +
+<span class="st">    </span><span class="kw">geom_point</span>() +
+<span class="st">    </span><span class="kw">theme_bw</span>() +
+<span class="st">    </span><span class="kw">base_theme</span>() +
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Individual Predicted Concentration (mg/L)&quot;</span>, 
+         <span class="dt">y =</span> <span class="st">&quot;Observed Concentration (mg/L)&quot;</span>)</code></pre></div>
+<p><img src="foce_output_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">plot_list &lt;-<span class="st"> </span>sdtab1 %&gt;%
+<span class="st">    </span><span class="kw">mutate</span>(<span class="dt">PNUM =</span> <span class="kw">ids_per_plot</span>(ID)) %&gt;%
+<span class="st">    </span><span class="kw">split</span>(.$PNUM) %&gt;%
+<span class="st">    </span><span class="kw">map</span>(~
+<span class="st">    </span><span class="kw">ggplot</span>(., <span class="kw">aes</span>(<span class="dt">x =</span> TIME, <span class="dt">y =</span> IPRED, <span class="dt">group =</span> ID)) +
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="dt">size =</span> <span class="fl">1.1</span>) +
+<span class="st">    </span><span class="kw">geom_line</span>(<span class="kw">aes</span>(<span class="dt">y =</span> PRED), <span class="dt">size =</span> <span class="fl">1.1</span>, <span class="dt">color =</span> mcp$blue) +<span class="st"> </span>
+<span class="st">    </span><span class="kw">geom_point</span>(<span class="kw">aes</span>(<span class="dt">y =</span> DV), <span class="dt">size =</span> <span class="fl">2.5</span>) +<span class="st"> </span><span class="kw">facet_wrap</span>(~ID) +
+<span class="st">    </span><span class="kw">theme_bw</span>() +
+<span class="st">    </span><span class="kw">base_theme</span>() +
+<span class="st">    </span><span class="kw">labs</span>(<span class="dt">y =</span> <span class="st">&quot;Population, Individual Predicted and Observed Concentrations (mg/L)&quot;</span>, 
+         <span class="dt">x =</span> <span class="st">&quot;Time (hours)&quot;</span>,
+         <span class="dt">subtitle =</span> <span class="st">&quot;blue line = population predicted&quot;</span>
+         ) +
+<span class="st">    </span><span class="kw">scale_y_log10</span>(<span class="dt">breaks =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="kw">ceiling</span>(<span class="kw">max</span>(.$DV)/<span class="dv">10</span>)*<span class="dv">10</span>))
+    )
+
+<span class="kw">print_plots</span>(plot_list)</code></pre></div>
+<p><img src="foce_output_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="foce_output_files/figure-html/unnamed-chunk-8-2.png" width="672" /></p>
+<p><img src="foce_output_files/figure-html/unnamed-chunk-8-3.png" width="672" /></p>
+<p><img src="foce_output_files/figure-html/unnamed-chunk-8-4.png" width="672" /></p>
+<p><img src="foce_output_files/figure-html/unnamed-chunk-8-5.png" width="672" /></p>
+<p><img src="foce_output_files/figure-html/unnamed-chunk-8-6.png" width="672" /></p>
+<pre><code>#&gt; [[1]]
+#&gt; NULL
+#&gt; 
+#&gt; [[2]]
+#&gt; NULL
+#&gt; 
+#&gt; [[3]]
+#&gt; NULL
+#&gt; 
+#&gt; [[4]]
+#&gt; NULL
+#&gt; 
+#&gt; [[5]]
+#&gt; NULL
+#&gt; 
+#&gt; [[6]]
+#&gt; NULL</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">session_details &lt;-<span class="st"> </span>devtools::<span class="kw">session_info</span>()
+session_details$platform
+<span class="co">#&gt;  setting  value                       </span>
+<span class="co">#&gt;  version  R version 3.3.2 (2016-10-31)</span>
+<span class="co">#&gt;  system   x86_64, mingw32             </span>
+<span class="co">#&gt;  ui       RTerm                       </span>
+<span class="co">#&gt;  language (EN)                        </span>
+<span class="co">#&gt;  collate  English_United States.1252  </span>
+<span class="co">#&gt;  tz       America/New_York            </span>
+<span class="co">#&gt;  date     2016-12-09</span>
+knitr::<span class="kw">kable</span>(session_details$packages)</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">package</th>
+<th align="left">*</th>
+<th align="left">version</th>
+<th align="left">date</th>
+<th align="left">source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">assertthat</td>
+<td align="left"></td>
+<td align="left">0.1</td>
+<td align="left">2013-12-06</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">backports</td>
+<td align="left"></td>
+<td align="left">1.0.4</td>
+<td align="left">2016-10-24</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">bookdown</td>
+<td align="left"></td>
+<td align="left">0.2</td>
+<td align="left">2016-11-12</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">codetools</td>
+<td align="left"></td>
+<td align="left">0.2-15</td>
+<td align="left">2016-10-05</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">colorspace</td>
+<td align="left"></td>
+<td align="left">1.2-7</td>
+<td align="left">2016-10-11</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">DBI</td>
+<td align="left"></td>
+<td align="left">0.5-1</td>
+<td align="left">2016-09-10</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">decorator</td>
+<td align="left">*</td>
+<td align="left">0.0.1</td>
+<td align="left">2016-12-09</td>
+<td align="left">local</td>
+</tr>
+<tr class="even">
+<td align="left">devtools</td>
+<td align="left"></td>
+<td align="left">1.12.0</td>
+<td align="left">2016-06-24</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">digest</td>
+<td align="left"></td>
+<td align="left">0.6.10</td>
+<td align="left">2016-08-02</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">dplyr</td>
+<td align="left">*</td>
+<td align="left">0.5.0</td>
+<td align="left">2016-06-24</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">evaluate</td>
+<td align="left"></td>
+<td align="left">0.10</td>
+<td align="left">2016-10-11</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">ggplot2</td>
+<td align="left">*</td>
+<td align="left">2.1.0.9001</td>
+<td align="left">2016-11-07</td>
+<td align="left">Github (<a href="mailto:hadley/ggplot2@70c3d69">hadley/ggplot2@70c3d69</a>)</td>
+</tr>
+<tr class="odd">
+<td align="left">gtable</td>
+<td align="left"></td>
+<td align="left">0.2.0</td>
+<td align="left">2016-02-26</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">highr</td>
+<td align="left"></td>
+<td align="left">0.6</td>
+<td align="left">2016-05-09</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">htmltools</td>
+<td align="left"></td>
+<td align="left">0.3.5</td>
+<td align="left">2016-03-21</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">httpuv</td>
+<td align="left"></td>
+<td align="left">1.3.3</td>
+<td align="left">2015-08-04</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">knitr</td>
+<td align="left">*</td>
+<td align="left">1.15</td>
+<td align="left">2016-11-09</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">labeling</td>
+<td align="left"></td>
+<td align="left">0.3</td>
+<td align="left">2014-08-23</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">lazyeval</td>
+<td align="left"></td>
+<td align="left">0.2.0</td>
+<td align="left">2016-06-12</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">magrittr</td>
+<td align="left"></td>
+<td align="left">1.5</td>
+<td align="left">2014-11-22</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">memoise</td>
+<td align="left"></td>
+<td align="left">1.0.0</td>
+<td align="left">2016-01-29</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">mime</td>
+<td align="left"></td>
+<td align="left">0.5</td>
+<td align="left">2016-07-07</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">miniUI</td>
+<td align="left"></td>
+<td align="left">0.1.1</td>
+<td align="left">2016-01-15</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">munsell</td>
+<td align="left"></td>
+<td align="left">0.4.3</td>
+<td align="left">2016-02-13</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">PKPDmisc</td>
+<td align="left">*</td>
+<td align="left">0.4.4.9000</td>
+<td align="left">2016-11-02</td>
+<td align="left">Github (<a href="mailto:dpastoor/PKPDmisc@beae2a6">dpastoor/PKPDmisc@beae2a6</a>)</td>
+</tr>
+<tr class="even">
+<td align="left">plyr</td>
+<td align="left"></td>
+<td align="left">1.8.4</td>
+<td align="left">2016-06-08</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">purrr</td>
+<td align="left">*</td>
+<td align="left">0.2.2</td>
+<td align="left">2016-06-18</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">R6</td>
+<td align="left"></td>
+<td align="left">2.2.0</td>
+<td align="left">2016-10-05</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">Rcpp</td>
+<td align="left"></td>
+<td align="left">0.12.8</td>
+<td align="left">2016-11-17</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">readr</td>
+<td align="left">*</td>
+<td align="left">1.0.0</td>
+<td align="left">2016-08-03</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">rmarkdown</td>
+<td align="left"></td>
+<td align="left">1.2</td>
+<td align="left">2016-11-21</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">rprojroot</td>
+<td align="left"></td>
+<td align="left">1.1</td>
+<td align="left">2016-10-29</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">scales</td>
+<td align="left"></td>
+<td align="left">0.4.0.9003</td>
+<td align="left">2016-11-07</td>
+<td align="left">Github (<a href="mailto:hadley/scales@d58d83a">hadley/scales@d58d83a</a>)</td>
+</tr>
+<tr class="even">
+<td align="left">shiny</td>
+<td align="left"></td>
+<td align="left">0.14.2</td>
+<td align="left">2016-11-01</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">stringi</td>
+<td align="left"></td>
+<td align="left">1.1.2</td>
+<td align="left">2016-10-01</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">stringr</td>
+<td align="left"></td>
+<td align="left">1.1.0</td>
+<td align="left">2016-08-19</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">tibble</td>
+<td align="left">*</td>
+<td align="left">1.2</td>
+<td align="left">2016-08-26</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">tidyr</td>
+<td align="left">*</td>
+<td align="left">0.6.0</td>
+<td align="left">2016-08-12</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">tidyverse</td>
+<td align="left">*</td>
+<td align="left">1.0.0</td>
+<td align="left">2016-09-09</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">withr</td>
+<td align="left"></td>
+<td align="left">1.0.2</td>
+<td align="left">2016-06-20</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="odd">
+<td align="left">xtable</td>
+<td align="left"></td>
+<td align="left">1.8-2</td>
+<td align="left">2016-02-05</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+<tr class="even">
+<td align="left">yaml</td>
+<td align="left"></td>
+<td align="left">2.1.13</td>
+<td align="left">2014-06-12</td>
+<td align="left">CRAN (R 3.3.2)</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="dataset-creation.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": false,
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/dpastoor/simplest_bayes/edit/master/foce_output.Rmd",
+"text": "Edit"
+},
+"download": null,
+"toc": {
+"collapse": "section"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
