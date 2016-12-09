@@ -1,0 +1,50 @@
+# NONMEM output
+
+## FOCE output
+
+```{r message=FALSE}
+library(knitr)
+library(PKPDmisc)
+library(tidyverse)
+library(decorator)
+```
+
+```{r}
+pallete <- Pallete$new("material_design")
+mcp <- pallete$colors() 
+```
+
+```{r}
+sdtab1 <- read_nonmem("../modeling/sdtab001")
+patab1 <- read_nonmem("../modeling/patab001")
+
+```
+
+### Output previews
+```{r}
+kable(head(sdtab1))
+kable(head(patab1))
+```
+
+### Visual summaries
+
+```{r}
+patab1 %>% 
+    select(ID:TVV) %>%
+    gather(iparam, value, CL, V) %>%
+    mutate(TVP = ifelse(iparam == "CL", TVCL, TVV)) %>%
+    ggplot(aes(x = value, group = iparam)) +
+    geom_density() +  
+    geom_vline(aes(xintercept = TVP), color = mcp$blue, size = 1.2) + 
+    facet_wrap(~iparam, scales = "free") + theme_bw() +
+    base_theme() +
+    labs(x = "Individual parameter value", subtitle="blue lines represent population typical value")
+    
+    
+```
+
+```{r cache = FALSE}
+session_details <- devtools::session_info()
+session_details$platform
+kable(session_details$packages)
+```
