@@ -14,14 +14,13 @@ pallete <- Pallete$new("material_design")
 mcp <- pallete$colors() 
 ```
 
-```{r}
+```{r data}
 sdtab1 <- read_nonmem("../modeling/sdtab001")
 patab1 <- read_nonmem("../modeling/patab001")
-
 ```
 
 ### Output previews
-```{r}
+```{r }
 kable(head(sdtab1))
 kable(head(patab1))
 ```
@@ -91,5 +90,5 @@ print_plots(plot_list)
 ```{r cache = FALSE}
 session_details <- devtools::session_info()
 session_details$platform
-kable(session_details$packages)
+knitr::kable(session_details$packages)
 ```

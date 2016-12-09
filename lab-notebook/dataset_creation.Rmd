@@ -155,5 +155,5 @@ write_nonmem(nm_dat, "../modeling/mdata/simple_nocovar_50id_6tp.csv")
 ```{r cache = FALSE}
 session_details <- devtools::session_info()
 session_details$platform
-kable(session_details$packages)
+knitr::kable(session_details$packages)
 ```
