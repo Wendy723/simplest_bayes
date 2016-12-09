@@ -28,6 +28,7 @@ kable(head(patab1))
 
 ### Visual summaries
 
+#### Parameter values
 ```{r}
 patab1 %>% 
     select(ID:TVV) %>%
@@ -39,8 +40,52 @@ patab1 %>%
     facet_wrap(~iparam, scales = "free") + theme_bw() +
     base_theme() +
     labs(x = "Individual parameter value", subtitle="blue lines represent population typical value")
-    
-    
+```
+
+#### Individual diagnostic plots
+
+
+```{r}
+sdtab1 %>%
+    filter(TIME >0) %>%
+    ggplot(aes(x = TIME, y = CWRES)) + geom_point() +
+    geom_smooth(se = FALSE, color = mcp$blue) +
+    theme_bw() +
+    base_theme() +
+    geom_smooth(aes(y = abs(CWRES)), se = F, color = mcp$red) + 
+    geom_smooth(aes(y = -abs(CWRES)), se = F, color = mcp$red) 
+```
+
+```{r}
+sdtab1 %>%
+    ggplot(aes(x = IPRED, y = DV)) + 
+    geom_abline(color = mcp$blue, size = 1.1) +
+    geom_point() +
+    theme_bw() +
+    base_theme() +
+    labs(x = "Individual Predicted Concentration (mg/L)", 
+         y = "Observed Concentration (mg/L)")
+```
+
+```{r}
+plot_list <- sdtab1 %>%
+    mutate(PNUM = ids_per_plot(ID)) %>%
+    split(.$PNUM) %>%
+    map(~
+    ggplot(., aes(x = TIME, y = IPRED, group = ID)) +
+    geom_line(size = 1.1) +
+    geom_line(aes(y = PRED), size = 1.1, color = mcp$blue) + 
+    geom_point(aes(y = DV), size = 2.5) + facet_wrap(~ID) +
+    theme_bw() +
+    base_theme() +
+    labs(y = "Population, Individual Predicted and Observed Concentrations (mg/L)", 
+         x = "Time (hours)",
+         subtitle = "blue line = population predicted"
+         ) +
+    scale_y_log10(breaks = c(1, 5, 10, 20, ceiling(max(.$DV)/10)*10))
+    )
+
+print_plots(plot_list)
 ```
 
 ```{r cache = FALSE}
