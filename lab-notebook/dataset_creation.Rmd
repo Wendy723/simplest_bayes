@@ -112,7 +112,7 @@ sampled_data %>%
     mutate(baseline = first(n),
            perc_bql = 100 - n/baseline*100) %>%
     filter(perc_bql > 0) %>% 
-    select(TIME, perc_bql) %>% kable()
+    select(TIME, perc_bql) %>% knitr::kable()
 ```
 
 ## IPRED and DV vs TIME for all individuals at sampled times
