@@ -1,0 +1,104 @@
+# Bayesian analysis
+
+```{r}
+library(PKPDmisc)
+library(data.table)
+library(tidyverse)
+library(knitr)
+```
+
+Core differences
+
+* Need priors on parameters
+* EM algorithms can more robustly handle full block matrices as well as
+random effects on less well-defined parameters.
+
+## Priors
+
+Priors in nonmem are defined as such:
+
+
+* NTHETA=number of Thetas to be estimated
+* NETA=number of Etas to be estimated
+    * (and to be described by NETAxBETA OMEGA matrix)
+* NTHP=number of thetas which have a prior
+* NETP=number of Omegas with prior
+
+In our case we have 2 Thetas (TVCL, TVV) and 2 omegas (nCl, nV)
+
+
+## Chains
+
+Technique - a 'master' execution file can be used to generate new paramater values
+that can be used for multi-chain runs.
+
+* NSAMPLE - sets number of preturbed parameter estimates, in this case 4
+* ISAMPLE - if subsequently estimating, will use the parameters generated from this sample
+    * by setting to 0 will not tweak these parameters
+
+```
+$EST METHOD=CHAIN FILE=run003chains.chn NSAMPLE=4 ISAMPLE=0 DF=10
+```
+
+The larger the DF (degrees of freedom for randomly creating the OMEGAS) the smaller the
+difference between newly generated values. Eg, with `DF=10000` almost no difference in values,
+whereas DF=5 will have 2x+ differences in values
+
+
+
+#### 4 chains
+
+```{r}
+modt <- read_file("../modeling/run006c.modt")
+map(1:4, ~ write_file(
+    infuse(modt, 
+           chain_number = ., 
+           seed = round(runif(1, 1000, 100000), 0)), 
+    file.path("..", "modeling", paste0("run006c", ., ".mod"))))
+```
+
+```{r}
+r6c1 <- fread("../modeling/run006c1.ext", skip = 1) %>% mutate(chain = 1)
+r6c2 <- fread("../modeling/run006c2.ext", skip = 1) %>% mutate(chain = 2)
+r6c3 <- fread("../modeling/run006c3.ext", skip = 1) %>% mutate(chain = 3)
+r6c4 <- fread("../modeling/run006c4.ext", skip = 1) %>% mutate(chain = 4)
+```
+
+
+```{r}
+r6_chains <- bind_rows(r6c1, r6c2, r6c3) %>% 
+    filter(ITERATION > 0) %>%
+    rename(CL = THETA1,
+           V = THETA2,
+           EPS = `SIGMA(1,1)`,
+           nCL = `OMEGA(1,1)`,
+           nV = `OMEGA(2,2)`,
+           nCL_nV = `OMEGA(2,1)`)
+```
+
+```{r}
+kable(head(r6_chains))
+```
+```{r}
+thin_by <- function(df, .mod) {
+    df %>% filter(ITERATION %% .mod == 0)
+}
+```
+
+```{r}
+r6_chains %>% select(ITERATION:nV, chain) %>%
+    thin_by(10) %>%
+    gather(param, value, CL:nV) %>%
+    ggplot(aes(x = ITERATION, y = value, color = factor(chain)), alpha = 0.6) +
+    geom_line() + facet_wrap(~param, ncol = 2, scales = "free") +
+    theme_bw() +
+    base_theme() +
+    scale_color_discrete(name = "Chain") + 
+    theme(legend.position = "bottom") 
+```
+
+```{r cache = FALSE}
+session_details <- devtools::session_info()
+session_details$platform
+knitr::kable(session_details$packages)
+```
