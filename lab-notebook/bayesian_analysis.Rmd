@@ -5,6 +5,7 @@ library(PKPDmisc)
 library(data.table)
 library(tidyverse)
 library(knitr)
+library(infuser)
 ```
 
 Core differences
@@ -15,8 +16,9 @@ random effects on less well-defined parameters.
 
 ## Priors
 
-Priors in nonmem are defined as such:
+Priors in nonmem may be defined in two ways:
 
+1) By distinguishing the thetas/omegas and their priors in `$PRIOR`
 
 * NTHETA=number of Thetas to be estimated
 * NETA=number of Etas to be estimated
@@ -26,6 +28,29 @@ Priors in nonmem are defined as such:
 
 In our case we have 2 Thetas (TVCL, TVV) and 2 omegas (nCl, nV)
 
+```
+$PRIOR NWPRI NTHETA=2 NETA=2, NTHP=2, NETP=2
+```
+
+Or the *preferred way* of distinguishing in the block definitions
+
+* $THETA - fixed effects
+* $OMEGA - random effects
+* $SIGMA - residual error
+* $THETAP - theta prior
+* $THETAPV - variance of theta prior
+* $OMEGAP - omega prior
+* $OMEGAPD - degrees of freedom to prior omega matrix
+
+** TODO: fill out explanations of each. **
+
+# Bayesian Problems (and solutions)
+
+Some of the problem areas in bayesian analysis techniques are .....
+
+* autocorrelation
+* sensitivity to priors
+* ...
 
 ## Chains
 
@@ -44,11 +69,12 @@ The larger the DF (degrees of freedom for randomly creating the OMEGAS) the smal
 difference between newly generated values. Eg, with `DF=10000` almost no difference in values,
 whereas DF=5 will have 2x+ differences in values
 
+#### example output comparing output from all chains
 
-
-#### 4 chains
+** TODO: add more instructions on what all is going on **
 
 ```{r}
+set.seed(1234567)
 modt <- read_file("../modeling/run006c.modt")
 map(1:4, ~ write_file(
     infuse(modt, 
