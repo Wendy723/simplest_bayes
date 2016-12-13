@@ -1,0 +1,203 @@
+# Dataset Creation
+
+```{r message=FALSE}
+library(knitr)
+library(PKPDmisc)
+library(tidyverse)
+library(mrgsolve) 
+library(infuser)
+```
+
+```{r}
+source("../scripts/model_details.R")
+```
+
+```{r}
+models <- source("../models/models.R")$value
+```
+
+
+## Generate data for mrgsolve
+
+start with a baseline of having 50 individuals worth of data, can scale to 
+different amounts of individuals later
+
+```{r}
+NIDS <- 56
+```
+
+```{r}
+demogs <-  data_frame(ID = 1:NIDS)
+```
+
+```{r}
+for_dosing <- demogs %>% 
+                  mutate(
+                      CMT = 1, 
+                      EVID = 1,
+                      TIME = 0,
+                      AMT = 1000,
+                      RATE = 1000,
+                      ADDL = 1,
+                      II = 12,
+                      OBSNUM = 0
+                  ) 
+```
+
+```{r}
+one_cmt_iv <- models$use("one_cmt_iv")
+```
+
+
+## Model Details
+
+```{r}
+mrgsolve::see(one_cmt_iv)
+```
+
+```{r }
+one_cmt_iv %>% 
+    model_details %>% 
+    filter(block != "CAPTURE") %>%
+    kable()
+```
+
+
+```{r }
+simulated_data <- one_cmt_iv %>% 
+    data_set(for_dosing) %>%
+    mrgsim(end = 36, delta = 0.25) %>% as_data_frame
+```
+
+## Distribution of peak and trough values
+
+* 'peak' defined as 1 hr post infusion and trough 1 hour prior to when next dose would begin
+```{r}
+simulated_data %>% 
+    filter(TIME %in% c(2, 11)) %>% 
+    mutate(DV = ifelse(DV < 0, 0, DV)) %>%
+    select(ID, DV) %>%
+    group_by(ID) %>%
+    summarize_all(funs(min, max)) %>%
+    gather(sample, value, -ID) %>%
+    ggplot(aes(x = value)) + 
+    geom_density() +
+    facet_wrap(~sample, scales = "free") +
+    theme_bw() +
+    base_theme()
+```
+
+## Predicted Profiles
+
+```{r}
+simulated_data %>% 
+    filter(IPRED > 0.1) %>%
+    ggplot(aes(x = TIME, y = IPRED, group = ID)) +
+    geom_line(size = 1.05, alpha = 0.8) + theme_bw() +
+    base_theme() + scale_y_log10(breaks = c(0.1, 1, 10, 20, 30, 40))
+```
+
+## Real world sampling and LLOQ
+
+```{r}
+
+sample_times_rich <- c(2, 6, 11, 14, 18, 23)
+
+LLOQ <- 0.1
+
+
+sampled_data_rich2d <- simulated_data %>% 
+    filter(TIME %in% sample_times_rich, DV > LLOQ) %>%
+    group_by(ID) %>% mutate(OBSNUM = dplyr::row_number(ID))
+
+sparser_scenarios <- list(
+    "s2d" = c(1, 3, 4, 6),
+    "s1dpt" = c(1, 3, 6),
+    "r1d" = c(1, 2, 3),
+    "s2trough" = c(3, 6),
+    "s1d" = c(1, 3),
+    "tr" = c(3)
+)
+
+sparser_scenario_data <- map(names(sparser_scenarios), function(scenario) {
+       res <- sampled_data_rich2d %>%
+         filter(OBSNUM %in% sparser_scenarios[[scenario]])
+       return(setNames(res, scenario))
+})
+```
+
+
+## IPRED and DV vs TIME for all individuals at sampled times
+
+```{r}
+list_plots_rich <-  simulated_data %>%
+    select(-DV) %>% 
+    left_join(sampled_data_rich2d %>% select(ID, TIME, DV)) %>%
+    mutate(PNUM = ids_per_plot(ID)) %>%
+    split(.$PNUM) %>%
+    map(~ 
+    ggplot(., aes(x = TIME, y = IPRED, group = ID)) +
+    geom_point(aes(y = DV), color = "blue") + 
+    geom_line(size = 1.05, alpha = 0.8) + theme_bw() +
+    base_theme() + facet_wrap(~ID) +
+        scale_y_log10(breaks = c(0.1, 1, 5, 10, 20, 30, 40))
+    )
+
+print_plots(list_plots_rich)
+```
+
+## Prepare for nonmem
+
+```{r}
+nm_dat_rich <- sampled_data_rich2d %>% select(ID, TIME, DV, OBSNUM) %>%
+    mutate(
+        CMT = 1,
+        EVID = 0
+    ) %>%
+    bind_rows(for_dosing) %>%
+        arrange(ID, TIME, desc(EVID))
+```
+
+*rich data
+
+```{r}
+kable(head(nm_dat_rich, n = 14))
+```
+
+## Create chains
+
+```{r}
+modt <- read_file("../modeling/run007c.modt")
+BASE_MODEL_NUM <- 7
+scenario_df <- as_data_frame(
+        expand.grid(chain = 1:4, scenario = names(sparser_scenarios))
+    ) %>% arrange(scenario) %>%
+    mutate(scenario_num = BASE_MODEL_NUM + as.numeric(as.factor(scenario)))
+
+by_row(scenario_df, function(row) {
+    set.seed(1234567)
+    ignore_obs <- setdiff(1:length(sample_times_rich), sparser_scenarios[[row$scenario]])
+    ignore <- paste0("IGNORE=(OCCNUM.EQN.", ignore_obs, ")", collapse = " ")
+    write_file(
+    infuse(modt, 
+           chain_number = row$chain, 
+           seed = round(runif(1, 1000, 100000), 0),
+           ignore = ignore,
+           scenario = row$scenario), 
+    file.path("..", "modeling", paste0("run", pad_left(row$scenario_num, 3), "c", row$chain, ".mod")))
+    })
+
+```
+
+## output data
+
+```{r}
+write_nonmem(nm_dat_rich2d, "../modeling/mdata/simple_nocovar_56id_6tp_md.csv")
+```
+
+
+```{r cache = FALSE}
+session_details <- devtools::session_info()
+session_details$platform
+knitr::kable(session_details$packages)
+```
