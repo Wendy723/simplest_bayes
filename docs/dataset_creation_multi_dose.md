@@ -306,6 +306,44 @@ scenario_df <- as_data_frame(
     ) %>% arrange(scenario) %>%
     mutate(scenario_num = BASE_MODEL_NUM + as.numeric(as.factor(scenario)))
 
+kable(scenario_df)
+```
+
+
+
+ chain  scenario    scenario_num
+------  ---------  -------------
+     1  s2d                    8
+     2  s2d                    8
+     3  s2d                    8
+     4  s2d                    8
+     1  s1dpt                  9
+     2  s1dpt                  9
+     3  s1dpt                  9
+     4  s1dpt                  9
+     1  r1d                   10
+     2  r1d                   10
+     3  r1d                   10
+     4  r1d                   10
+     1  s2trough              11
+     2  s2trough              11
+     3  s2trough              11
+     4  s2trough              11
+     1  s1d                   12
+     2  s1d                   12
+     3  s1d                   12
+     4  s1d                   12
+     1  tr                    13
+     2  tr                    13
+     3  tr                    13
+     4  tr                    13
+
+Want to inject in the chain number and scenario name, as well as subset
+the data relevant to the scenario. The ignore statements control which 
+OBSNUM will be retained for estimation
+
+
+```r
 by_row(scenario_df, function(row) {
     set.seed(1234567)
     ignore_obs <- setdiff(1:length(sample_times_rich), sparser_scenarios[[row$scenario]])
@@ -349,7 +387,7 @@ session_details$platform
 #>  language (EN)                        
 #>  collate  English_United States.1252  
 #>  tz       America/New_York            
-#>  date     2016-12-12
+#>  date     2016-12-13
 knitr::kable(session_details$packages)
 ```
 
