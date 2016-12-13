@@ -174,6 +174,14 @@ scenario_df <- as_data_frame(
     ) %>% arrange(scenario) %>%
     mutate(scenario_num = BASE_MODEL_NUM + as.numeric(as.factor(scenario)))
 
+kable(scenario_df)
+```
+
+Want to inject in the chain number and scenario name, as well as subset
+the data relevant to the scenario. The ignore statements control which 
+OBSNUM will be retained for estimation
+
+```{r}
 by_row(scenario_df, function(row) {
     set.seed(1234567)
     ignore_obs <- setdiff(1:length(sample_times_rich), sparser_scenarios[[row$scenario]])
