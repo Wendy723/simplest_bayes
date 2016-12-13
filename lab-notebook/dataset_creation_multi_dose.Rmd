@@ -177,7 +177,7 @@ scenario_df <- as_data_frame(
 by_row(scenario_df, function(row) {
     set.seed(1234567)
     ignore_obs <- setdiff(1:length(sample_times_rich), sparser_scenarios[[row$scenario]])
-    ignore <- paste0("IGNORE=(OCCNUM.EQN.", ignore_obs, ")", collapse = " ")
+    ignore <- paste0("IGNORE=(OBSNUM.EQN.", ignore_obs, ")", collapse = " ")
     write_file(
     infuse(modt, 
            chain_number = row$chain, 
