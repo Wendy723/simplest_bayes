@@ -286,7 +286,7 @@ session_details$platform
 #>  language (EN)                        
 #>  collate  English_United States.1252  
 #>  tz       America/New_York            
-#>  date     2016-12-09
+#>  date     2016-12-12
 knitr::kable(session_details$packages)
 ```
 

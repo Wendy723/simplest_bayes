@@ -1,7 +1,5 @@
 
-# NONMEM output
-
-## FOCE output
+# FOCE Analysis
 
 
 ```r
@@ -21,6 +19,8 @@ mcp <- pallete$colors()
 ```r
 sdtab1 <- read_nonmem("../modeling/sdtab001")
 patab1 <- read_nonmem("../modeling/patab001")
+sdtab2 <- read_nonmem("../modeling/sdtab002")
+patab2 <- read_nonmem("../modeling/patab002")
 ```
 
 ### Output previews
@@ -165,6 +165,7 @@ print_plots(plot_list)
 ```
 
 
+
 ```r
 session_details <- devtools::session_info()
 session_details$platform
@@ -175,7 +176,7 @@ session_details$platform
 #>  language (EN)                        
 #>  collate  English_United States.1252  
 #>  tz       America/New_York            
-#>  date     2016-12-09
+#>  date     2016-12-12
 knitr::kable(session_details$packages)
 ```
 
