@@ -40,6 +40,8 @@ order <- list(
     c(1, 2, 3, 4, 5)
 )
 
+# label values associated with each scenario
+# eg scenario 1 contained 4 points (P)eak/(T)rough (P)eak/(T)rough 
 labels <-  c(
     "P/T/P/T",
     "P/T/T",
@@ -48,9 +50,14 @@ labels <-  c(
     "P/T"
 )
 
+# given the plots will have sequentially more scenarios, the labels should
+# only be set for the scenarios available at each step, so give back the
+# scenarios (o) and the labels associated with that scenario
 plot_order <- map(order, function(o) {
     return(list(o, labels[o]))
 })
+
+# list of the plots
 gg_frames <- map(plot_order, function(o) {
     id1_cl %>% filter(scenario %in% o[[1]]) %>%
         ggplot(aes(x = CL)) + geom_density(aes(fill = factor(scenario)), alpha = 0.6) +
@@ -59,12 +66,15 @@ gg_frames <- map(plot_order, function(o) {
         labs(x = "Posterior Density of Clearance")
 })
 
+# need to save plots somewhere as magick requires them to be saved out
 tmp <- tempdir()
 
 lapply(seq_along(gg_frames), function(pi) {
     ggsave(file.path(tmp, paste0("plot", pi, ".png")), gg_frames[[pi]])
 })
 
+# magick requires all plots to be read in via image_read, image_join allows
+# the list of plots to be passed in to be animated
 image_animate(image_join(lapply(1:5, function(i) {
     image_read(path = paste0(tmp, "plot", i, ".png"))
 })), fps = 1)
