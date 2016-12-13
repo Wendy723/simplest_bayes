@@ -192,7 +192,7 @@ by_row(scenario_df, function(row) {
 ## output data
 
 ```{r}
-write_nonmem(nm_dat_rich2d, "../modeling/mdata/simple_nocovar_56id_6tp_md.csv")
+write_nonmem(nm_dat_rich, "../modeling/mdata/simple_nocovar_56id_6tp_md.csv")
 ```
 
 
