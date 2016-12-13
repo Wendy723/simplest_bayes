@@ -4,7 +4,8 @@ rmd_files: [
   "index.Rmd",
   "dataset_creation.Rmd",
   "foce_output.Rmd",
-  "bayesian_analysis.Rmd"
+  "bayesian_analysis.Rmd",
+  "dataset_creation_multi_dose.Rmd"
 ]
 output_dir: "../docs"
 before_chapter_script: "_common.R"
