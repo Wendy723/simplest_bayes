@@ -1,6 +1,6 @@
-$PROB one cmpt simple mu modeled bayes multidose
+$PROB one cmpt simple mu modeled bayes multidose {{scenario}}
 $SUB ADVAN1 TRANS2
-$INPUT ID TIME DV CMT EVID AMT RATE ADDL II
+$INPUT ID TIME DV OBSNUM CMT EVID AMT RATE ADDL II 
 $DATA mdata/simple_nocovar_56id_6tp_md.csv 
 IGNORE=@ {{ignore | ""}}
 $ABBR REPLACE THETA(CL, V) = THETA(1 to 2)
