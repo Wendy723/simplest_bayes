@@ -8,6 +8,10 @@ library(knitr)
 library(infuser)
 ```
 
+```{r}
+source("../scripts/thin_by.R")
+```
+
 Core differences
 
 * Need priors on parameters
@@ -104,11 +108,6 @@ r6_chains <- bind_rows(r6c1, r6c2, r6c3) %>%
 
 ```{r}
 kable(head(r6_chains))
-```
-```{r}
-thin_by <- function(df, .mod) {
-    df %>% filter(ITERATION %% .mod == 0)
-}
 ```
 
 ```{r}
