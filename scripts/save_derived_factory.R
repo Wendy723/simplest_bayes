@@ -6,7 +6,7 @@
 #' save_derived <- save_derived_factory("../data/derived")
 #' save_derived(Theoph, "Theoph.rds")
 save_derived_factory <- function(.derived_location, .mkdir = TRUE, verbose = FALSE) {
-    .loc <- normalizePath(.derived_location)
+    .loc <- normalizePath(.derived_location, mustWork = FALSE)
     if (!dir.exists(.loc)) {
         if (!.mkdir) {
             stop(paste("could not find directory at location: ", .derived_location))
