@@ -27,12 +27,15 @@ save_to_derived <- save_derived_factory("../data/derived/track/")
 
 ```{r}
 dirs <- list.dirs("../modeling/",  recursive = F)
-is_chain_dir <- grepl(pattern = "\\dc\\d", dirs)
+
+# match runs such as run008c1_est_01 as chain runs correspond to run<x>c<y>
+run_desc_regex <- "run(\\d+)c(\\d+)_est_(\\d+)"
+
+is_chain_dir <- grepl(pattern = run_desc_regex, dirs)
 chain_dirs <- dirs[is_chain_dir]
 
 chain_df <- data_frame(dir = chain_dirs)
 
-run_desc_regex <- "run(\\d+)c(\\d+)_est_(\\d+)"
 
 chain_info <- chain_df %>% bind_cols(
     map_df(str_match_all(chain_dirs, run_desc_regex), 
