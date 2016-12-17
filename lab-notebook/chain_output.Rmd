@@ -1,0 +1,86 @@
+# Handling Chain Output
+
+The following code is included in the documentation, however is not run interactively as only need to process once
+on the machine that the modeling is originally run on.
+
+```{r cache = F}
+library(knitr)
+opts_chunk$set(eval = F, cache = F)
+```
+
+```{r}
+library(stringr)
+library(tidyverse)
+library(PKPDmisc)
+library(future)
+library(data.table)
+```
+
+```{r}
+source("../scripts/save_derived_factory.R")
+```
+
+```{r}
+save_to_derived <- save_derived_factory("../data/derived/track/")
+```
+
+
+```{r}
+dirs <- list.dirs("../modeling/",  recursive = F)
+is_chain_dir <- grepl(pattern = "\\dc\\d", dirs)
+chain_dirs <- dirs[is_chain_dir]
+
+chain_df <- data_frame(dir = chain_dirs)
+
+run_desc_regex <- "run(\\d+)c(\\d+)_est_(\\d+)"
+
+chain_info <- chain_df %>% bind_cols(
+    map_df(str_match_all(chain_dirs, run_desc_regex), 
+           ~ data_frame(runno = as_numeric(.[,2]),
+           chain = as_numeric(.[,3]),
+           est = as_numeric(.[,4]))
+           )
+)
+```
+
+
+```{r}
+plan(multiprocess)
+processed_res <- chain_info %>% 
+    filter(runno >= 8) %>% 
+    by_row(function(df) {
+        future({
+            fullPath <- normalizePath(df$dir)
+            runname <- basename(fullPath)
+            fortfile <- file.path(fullPath, "fort.50") 
+            if (!file.exists(fortfile)) {
+                message("no fort.50 file found for: ", runname)
+                return(FALSE)
+            }
+            data <- as_data_frame(fread(fortfile, header = FALSE, data.table = F))
+            names(data) <- c("ITERATION", "ID", "CL", "V")
+            saveRDS(
+                data %>% 
+                    thin_by(10) %>%
+                    mutate(chain = df$chain,
+                                runno = df$runno),
+                normalizePath(file.path("../data/derived/track", paste0(runname, ".rds")))
+            )
+            return(TRUE)
+        })
+    }, .to = "res") 
+
+# check if processed correctly for all values
+map_lgl(processed_res$res, value) %>% all()
+```
+
+
+
+
+```{r}
+session_details <- devtools::session_info()
+session_details$platform
+knitr::kable(session_details$packages)
+```
+
+
