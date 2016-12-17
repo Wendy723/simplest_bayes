@@ -43,7 +43,7 @@ chain_info <- chain_df %>% bind_cols(
 )
 ```
 
-
+Process in parallel all folders
 ```{r}
 plan(multiprocess)
 processed_res <- chain_info %>% 
@@ -52,20 +52,20 @@ processed_res <- chain_info %>%
         future({
             fullPath <- normalizePath(df$dir)
             runname <- basename(fullPath)
-            fortfile <- file.path(fullPath, "fort.50") 
+            fortfile <- normalizePath(file.path(fullPath, "fort.50"))
             if (!file.exists(fortfile)) {
                 message("no fort.50 file found for: ", runname)
                 return(FALSE)
             }
             data <- as_data_frame(fread(fortfile, header = FALSE, data.table = F))
             names(data) <- c("ITERATION", "ID", "CL", "V")
-            saveRDS(
+            save_to_derived(
                 data %>% 
                     thin_by(10) %>%
                     mutate(chain = df$chain,
                                 runno = df$runno),
-                normalizePath(file.path("../data/derived/track", paste0(runname, ".rds")))
-            )
+                paste0(runname, ".rds")
+                )
             return(TRUE)
         })
     }, .to = "res") 
