@@ -1,0 +1,112 @@
+# Multiple scenarios
+
+```{r message=FALSE}
+library(knitr)
+library(tidyverse)
+library(infuser)
+```
+
+The following scenarios are to be applied to the multidose scenario generated previously
+
+```{r}
+NIDS <- 56 # number of ids available in generated data
+```
+
+```{r}
+
+sample_times_rich <- c(2, 6, 11, 14, 18, 23)
+
+
+sparser_scenarios <- list(
+    "s2d" = c(1, 3, 4, 6),
+    "s1dpt" = c(1, 3, 6),
+    "r1d" = c(1, 2, 3),
+    "s2trough" = c(3, 6),
+    "s1d" = c(1, 3),
+    "tr" = c(3)
+)
+
+```
+
+## Create chains
+
+```{r}
+create_scenarios <- function(nids, scenario_list, n_chains, base_num = 1) {
+    scenario_df <- tibble::as_data_frame(
+            expand.grid(
+                nids = nids,
+                chain = 1:n_chains, 
+                scenario = names(scenario_list)
+            )
+        ) %>% 
+        dplyr::arrange(nids, scenario) %>%
+        mutate(scenario_num = base_num + as.numeric(as.factor(interaction(scenario, nids))) - 1)
+}
+```
+
+```{r}
+scenario_df <- create_scenarios(c(9, 18, 36, 56), sparser_scenarios, 4, 101) 
+kable(scenario_df)
+```
+
+```{r}
+modt <- read_file("../modeling/run100c.modt")
+variables_requested(modt)
+```
+
+Want to inject in the chain number and scenario name, as well as subset
+the data relevant to the scenario. The ignore statements control which 
+OBSNUM will be retained for estimation
+
+```{r}
+generate_file_name <- function(scenario_num, nids, scenario, chain) {
+    paste0("run", 
+           PKPDmisc::pad_left(scenario_num, 3),
+           "_nids_",
+           nids,
+           "_",
+           scenario,
+           "_",
+           "c", 
+           chain, 
+           ".mod")
+}
+
+infuse_scenario <- function(row, all_obs_times, all_scenarios, .seed = 1234567) {
+    set.seed(.seed)
+    if (is.null(all_scenarios[[row$scenario]])) {
+       stop(paste0("unidentified scenario detected with params: ", row, collapse = ", "))
+    }
+    ignore_obs <- setdiff(1:length(all_obs_times), all_scenarios[[row$scenario]])
+    ignore <- paste0("IGNORE=(OBSNUM.EQN.", ignore_obs, ")", collapse = " ")
+    readr::write_file(
+        infuser::infuse(modt, 
+               nids = row$nids,
+               scenario = row$scenario,
+               ignore = ignore,
+               chain_number = row$chain, 
+               seed = round(runif(1, 1000, 100000), 0)
+               ), 
+        file.path("..", "modeling", 
+                  generate_file_name(row$scenario_num, 
+                                     row$nids, 
+                                     row$scenario, 
+                                     row$chain)
+                  )
+        )
+}
+```
+
+Create the scenario template files
+
+```{r}
+by_row(scenario_df, infuse_scenario, sample_times_rich, sparser_scenarios)
+```
+
+## output data
+
+```{r cache = FALSE}
+session_details <- devtools::session_info()
+session_details$platform
+knitr::kable(session_details$packages)
+```
