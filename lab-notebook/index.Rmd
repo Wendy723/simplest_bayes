@@ -13,3 +13,19 @@ documentclass: book
 # Welcome {-}
 
 An extremely simple example of modeling and postprocessing a bayesian dataset with nonmem
+
+
+## Technical Objectives
+
+* How to build a bayesian control stream in nonmem
+* how to set up chains
+* how to postprocess results
+* how to accept the posterior as a prior to a new model
+
+## Learning Objectives
+
+* demonstrate how the posterior distribution changes under certain characteristics
+    * number of individuals
+    * richness of data
+    * strength of prior
+* demonstrate how to provide iteratively updated recommendations 
