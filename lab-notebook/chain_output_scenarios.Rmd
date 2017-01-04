@@ -1,0 +1,131 @@
+# Handling Chain Output
+
+The following code is included in the documentation, however is not run interactively as only need to process once
+on the machine that the modeling is originally run on.
+
+```{r cache = F}
+library(knitr)
+opts_chunk$set(eval = F, cache = F)
+```
+
+```{r}
+library(stringr)
+library(tidyverse)
+library(PKPDmisc)
+library(future)
+library(data.table)
+library(satchel)
+```
+
+```{r}
+source("../scripts/thin_by.R")
+```
+
+
+```{r}
+satchel <- Satchel$new("scenario_set1", "../data/derived/satchel")
+```
+
+
+```{r}
+dirs <- list.dirs("../modeling/rundir_001/",  recursive = F)
+
+# match runs such as run008c1_est_01 as chain runs correspond to run<x>c<y>
+run_desc_regex <- "run(\\d+)_nids_(\\d+)_(.+)_c(\\d+)_est_(\\d+)"
+
+is_chain_dir <- grepl(pattern = run_desc_regex, dirs)
+chain_dirs <- dirs[is_chain_dir]
+
+chain_df <- data_frame(dir = chain_dirs)
+
+
+chain_info <- chain_df %>% bind_cols(
+    map_df(str_match_all(chain_dirs, run_desc_regex), 
+           ~ data_frame(
+               runno = as_numeric(.[,2]),
+               nids = as_numeric(.[,3]),
+               scenario = .[,4],
+               chain = as_numeric(.[,5]),
+               est = as_numeric(.[,6]))
+           )
+)
+```
+
+```{r}
+kable(head(chain_info))
+kable(tail(chain_info))
+```
+
+
+Process in parallel all folders
+```{r}
+plan(multiprocess)
+processed_res <- chain_info %>% 
+    by_row(function(df) {
+        future({
+            fullPath <- normalizePath(df$dir)
+            runname <- basename(fullPath)
+            fortfile <- normalizePath(file.path(fullPath, "fort.50"))
+            if (!file.exists(fortfile)) {
+                message("no fort.50 file found for: ", runname)
+                return(FALSE)
+            }
+            data <- as_data_frame(fread(fortfile, header = FALSE, data.table = F))
+            names(data) <- c("ITERATION", "ID", "CL", "V")
+            output <-  data %>% 
+                    thin_by(10) %>%
+                    mutate(
+                        chain = df$chain,
+                        runno = df$runno,
+                        nids = df$nids,
+                        scenario = df$scenario
+                           )
+            satchel$save(output, data_name = runname)
+            return(TRUE)
+        })
+    }, .to = "res") 
+
+# check if processed correctly for all values
+map_lgl(processed_res$res, value) %>% all()
+```
+
+ITERATION    THETA1       THETA2       SIGMA(1,1)   OMEGA(1,1)   OMEGA(2,1)   OMEGA(2,2)   MCMCOBJ
+```{r}
+plan(multiprocess)
+processed_ext <- chain_info %>% 
+    by_row(function(df) {
+        future({
+            fullPath <- normalizePath(df$dir)
+            runname <- basename(fullPath)
+            extfile <- dir(fullPath, pattern = "*.ext", full.names=TRUE)
+            if (!file.exists(extfile)) {
+                message("no ext file found for: ", runname)
+                return(FALSE)
+            }
+            data <- as_data_frame(fread(extfile, header = FALSE, data.table = F, skip = 2))
+            names(data) <- c("ITERATION", "CL", "V", "RV", "nCL", "nCL_nV", "nV", "MCMCOBJ")
+            output <-  data %>% filter(ITERATION >= 0) %>%
+                    thin_by(10) %>%
+                    mutate(
+                        chain = df$chain,
+                        runno = df$runno,
+                        nids = df$nids,
+                        scenario = df$scenario
+                           )
+            satchel$save(output, data_name = paste0(runname, "_ext"))
+            return(TRUE)
+        })
+    }, .to = "res") 
+
+# check if processed correctly for all values
+map_lgl(processed_ext$res, value) %>% all()
+```
+
+
+```{r}
+session_details <- devtools::session_info()
+session_details$platform
+knitr::kable(session_details$packages)
+```
+
+
