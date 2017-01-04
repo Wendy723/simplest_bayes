@@ -1,0 +1,1145 @@
+Tue 01/03/2017 
+10:26 PM
+$PROB one cmpt simple mu modeled bayes multidose nids: 18 scenario: s1d
+;; based_on: run100
+$SUB ADVAN1 TRANS2
+$INPUT ID TIME DV OBSNUM CMT EVID AMT RATE ADDL II 
+$DATA ..\..\mdata\simple_nocovar_56id_6tp_md.csv
+IGNORE=@ 
+IGNORE=(OBSNUM.EQN.2)
+IGNORE=(OBSNUM.EQN.4)
+IGNORE=(OBSNUM.EQN.5)
+IGNORE=(OBSNUM.EQN.6)
+IGNORE=(ID.GT.18)
+$ABBR REPLACE THETA(CL, V) = THETA(1 to 2)
+$ABBR REPLACE ETA(CL, V) = ETA(1 to 2)
+
+$THETAI
+THETA(1:NTHETA)=LOG(THETAI(1:NTHETA))
+THETAP(1:NTHETAP)=LOG(THETAPI(1:NTHETAP))
+$THETAR
+THETAR(1:NTHETA)=EXP(THETA(1:NTHETA))
+THETAPR(1:NTHETAP)=EXP(THETAP(1:NTHETAP))
+
+$PRIOR NWPRI 
+
+$PK
+"USE NMBAYES_INT, ONLY: ITER_REPORT,BAYES_EXTRA_REQUEST,BAYES_EXTRA
+; Request extra information for Bayesian analysis.
+; An extra call will then be made for accepted samples
+"BAYES_EXTRA_REQUEST=1
+
+MU_1 = THETA(CL)
+MU_2 = THETA(V)
+CL = EXP(MU_1 + ETA(CL))
+V = EXP(MU_2 + ETA(V))
+S1 = V
+
+"IF(BAYES_EXTRA==1 .AND. ITER_REPORT>=0 .AND. TIME==0.0) THEN
+"WRITE(50,98) ITER_REPORT,ID,CL,V
+"98 FORMAT(I12,1X,F14.0,4(1X,1PG12.5))
+"ENDIF
+
+$ERROR
+IPRED=F
+Y = IPRED*(1 + ERR(1))  
+
+$THETA
+(0.001, 2.5) ; TVCL
+(0.001, 46) ; TVV
+
+$OMEGA BLOCK(2)
+0.1    ; nCL
+0.1  0.1  ; nV
+
+$SIGMA
+0.03 ; PROP
+
+; THETA PRIORS
+$THETAP (2.5 FIX) (46 FIX) 
+
+; THETA (uniformative) PRIORs
+$THETAPV BLOCK(2)
+10000 FIX
+0.0 10000 
+
+$OMEGAP BLOCK(2)
+0.2 FIX
+0 0.2
+
+; degrees of freedom to prior omega matrix - low dof = highly uninformative
+$OMEGAPD (2 FIX)
+
+$EST METHOD=CHAIN FILE=..\run100.chn NSAMPLE=0 ISAMPLE=1 DF=20
+$EST METHOD=BAYES INTER NBURN=4000 NITER=10000 PRINT=20 NOPRIOR=0 CTYPE=3 CITER=10 SEED=56664
+  
+NM-TRAN MESSAGES 
+  
+ WARNINGS AND ERRORS (IF ANY) FOR PROBLEM    1
+             
+ (WARNING  2) NM-TRAN INFERS THAT THE DATA ARE POPULATION.
+
+ (MU_WARNING 20) MU_001: MU_ VARIABLE SHOULD NOT BE DEFINED AFTER VERBATIM CODE.
+  
+License Registered to: Devin Pastoor
+Expiration Date:    14 NOV 2017
+Current Date:        3 JAN 2017
+Days until program expires : 311
+1NONLINEAR MIXED EFFECTS MODEL PROGRAM (NONMEM) VERSION 7.4.0 alpha14 (nm74a14)
+ ORIGINALLY DEVELOPED BY STUART BEAL, LEWIS SHEINER, AND ALISON BOECKMANN
+ CURRENT DEVELOPERS ARE ROBERT BAUER, ICON DEVELOPMENT SOLUTIONS,
+ AND ALISON BOECKMANN. IMPLEMENTATION, EFFICIENCY, AND STANDARDIZATION
+ PERFORMED BY NOUS INFOSYSTEMS.
+
+ PROBLEM NO.:         1
+ one cmpt simple mu modeled bayes multidose nids: 18 scenario: s1d
+0DATA CHECKOUT RUN:              NO
+ DATA SET LOCATED ON UNIT NO.:    2
+ THIS UNIT TO BE REWOUND:        NO
+ NO. OF DATA RECS IN DATA SET:       54
+ NO. OF DATA ITEMS IN DATA SET:  11
+ ID DATA ITEM IS DATA ITEM NO.:   1
+ DEP VARIABLE IS DATA ITEM NO.:   3
+ MDV DATA ITEM IS DATA ITEM NO.: 11
+0INDICES PASSED TO SUBROUTINE PRED:
+   6   2   7   8   0  10   5   0   0   0   9
+0LABELS FOR DATA ITEMS:
+ ID TIME DV OBSNUM CMT EVID AMT RATE ADDL II MDV
+0LABELS FOR THETAS
+ THETA(1)=THETA(CL)
+ THETA(2)=THETA(V)
+0LABELS FOR ETAS
+ ETA(1)=ETA(CL)
+0LABELS FOR ETAS
+ ETA(2)=ETA(V)
+0FORMAT FOR DATA:
+ (2E3.0,E17.0,3E2.0,2E5.0,E2.0,E3.0,1F2.0)
+
+ TOT. NO. OF OBS RECS:       36
+ TOT. NO. OF INDIVIDUALS:     18
+0LENGTH OF THETA:   5
+0DEFAULT THETA BOUNDARY TEST OMITTED:    NO
+0OMEGA HAS BLOCK FORM:
+  1
+  1  1
+  0  0  2
+  0  0  2  2
+  0  0  0  0  3
+  0  0  0  0  3  3
+0DEFAULT OMEGA BOUNDARY TEST OMITTED:    NO
+0SIGMA HAS SIMPLE DIAGONAL FORM WITH DIMENSION:   1
+0DEFAULT SIGMA BOUNDARY TEST OMITTED:    NO
+0INITIAL ESTIMATE OF THETA:
+ LOWER BOUND    INITIAL EST    UPPER BOUND
+  0.1000E-02     0.2500E+01     0.1000E+07
+  0.1000E-02     0.4600E+02     0.1000E+07
+  0.2500E+01     0.2500E+01     0.2500E+01
+  0.4600E+02     0.4600E+02     0.4600E+02
+  0.2000E+01     0.2000E+01     0.2000E+01
+0INITIAL ESTIMATE OF OMEGA:
+ BLOCK SET NO.   BLOCK                                                                    FIXED
+        1                                                                                   NO
+ DIAGONAL SHIFT OF  1.1000E-07 WAS IMPOSED TO ENSURE POSITIVE DEFINITENESS
+                  0.1000E+00
+                  0.1000E+00   0.1000E+00
+        2                                                                                  YES
+                  0.1000E+05
+                  0.0000E+00   0.1000E+05
+        3                                                                                  YES
+                  0.2000E+00
+                  0.0000E+00   0.2000E+00
+0INITIAL ESTIMATE OF SIGMA:
+ 0.3000E-01
+0
+ THETAI SUBROUTINE USER-SUPPLIED
+ THETAR SUBROUTINE USER-SUPPLIED
+ PRIOR SUBROUTINE USER-SUPPLIED
+1DOUBLE PRECISION PREDPP VERSION 7.4.0 alpha14 (nm74a14)
+
+ ONE COMPARTMENT MODEL (ADVAN1)
+0MAXIMUM NO. OF BASIC PK PARAMETERS:   2
+0BASIC PK PARAMETERS (AFTER TRANSLATION):
+   ELIMINATION RATE (K) IS BASIC PK PARAMETER NO.:  1
+
+ TRANSLATOR WILL CONVERT PARAMETERS
+ CLEARANCE (CL) AND VOLUME (V) TO K (TRANS2)
+0COMPARTMENT ATTRIBUTES
+ COMPT. NO.   FUNCTION   INITIAL    ON/OFF      DOSE      DEFAULT    DEFAULT
+                         STATUS     ALLOWED    ALLOWED    FOR DOSE   FOR OBS.
+    1         CENTRAL      ON         NO         YES        YES        YES
+    2         OUTPUT       OFF        YES        NO         NO         NO
+1
+ ADDITIONAL PK PARAMETERS - ASSIGNMENT OF ROWS IN GG
+ COMPT. NO.                             INDICES
+              SCALE      BIOAVAIL.   ZERO-ORDER  ZERO-ORDER  ABSORB
+                         FRACTION    RATE        DURATION    LAG
+    1            3           *           *           *           *
+    2            *           -           -           -           -
+             - PARAMETER IS NOT ALLOWED FOR THIS MODEL
+             * PARAMETER IS NOT SUPPLIED BY PK SUBROUTINE;
+               WILL DEFAULT TO ONE IF APPLICABLE
+0DATA ITEM INDICES USED BY PRED ARE:
+   EVENT ID DATA ITEM IS DATA ITEM NO.:      6
+   TIME DATA ITEM IS DATA ITEM NO.:          2
+   DOSE AMOUNT DATA ITEM IS DATA ITEM NO.:   7
+   DOSE RATE DATA ITEM IS DATA ITEM NO.:     8
+   INTERVAL DATA ITEM IS DATA ITEM NO.:     10
+   ADDL. DOSES DATA ITEM IS DATA ITEM NO.:   9
+   COMPT. NO. DATA ITEM IS DATA ITEM NO.:    5
+
+0PK SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+ PK SUBROUTINE NOT CALLED AT NONEVENT (ADDITIONAL OR LAGGED) DOSE TIMES.
+0ERROR SUBROUTINE CALLED WITH EVERY EVENT RECORD.
+1
+
+
+ #TBLN:      1
+ #METH: Chain Method Processing
+
+ RANDOM GENERATION TYPE (CTYPE):     0
+ RANDOM GENERATION SEED (SEED):      11456
+ RANDOM SAMPLE SELECTION (ISAMPLE):  1
+ RANDOM SAMPLE RANGE END (ISAMPEND): -2147483647
+ NUMBER OF RANDOM SAMPLES (NSAMPLE): 0
+ UNIFORM FRACTIONAL RANGE (IACCEPT): 0.400000000000000
+ RANDOM SELECTION TYPE (SELECT):     0
+ DEG. FR. TO GENERATE OMEGAS (DF):   20
+ DEG. FR. TO GENERATE SIGMAS (DFS):  -1
+ CHAIN FILE (FILE):                  ..\run100.chn
+ EXCL. TITLE IN CHAIN FILE (NOTITLE):NO
+ EX. COL. LBS. IN CHAIN FL.(NOLABEL):NO
+ FORMAT FOR CHAIN FILE (FORMAT):     S1PE12.5
+ PAR. ORDER in CHAIN FILE (ORDER):   TSOL
+ RANDOM SAMPLING METHOD (RANMETHOD):3U
+
+ THE FOLLOWING LABELS ARE EQUIVALENT
+ PRED=NPRED
+ RES=NRES
+ WRES=NWRES
+ IWRS=NIWRES
+ IPRD=NIPRED
+ IRS=NIRES
+
+
+
+ FROM SAMPLE 1 OF CHAIN FILE ..\run100.chn
+ NEW INITIAL ESTIMATES OF THETA
+  0.2537E-01
+  0.6427E-01
+ NEW INITIAL ESTIMATES OF OMEGA
+ DIAGONAL SHIFT OF  1.2800E-07 WAS IMPOSED ON OMEGAS TO ENSURE POSITIVE DEFINITENESS
+  0.1164E+00
+  0.1164E+00  0.1164E+00
+ NEW INITIAL ESTIMATES OF SIGMA
+  0.3730E-01
+1
+
+
+ #TBLN:      1
+ #METH: MCMC Bayesian Analysis
+
+ ESTIMATION STEP OMITTED:                 NO
+ ANALYSIS TYPE:                           POPULATION
+ NUMBER OF SADDLE POINT RESET ITERATIONS:      0
+ GRADIENT METHOD USED:               NOSLOW
+ CONDITIONAL ESTIMATES USED:              YES
+ CENTERED ETA:                            NO
+ EPS-ETA INTERACTION:                     YES
+ LAPLACIAN OBJ. FUNC.:                    NO
+ NO. OF FUNCT. EVALS. ALLOWED:            840
+ NO. OF SIG. FIGURES REQUIRED:            3
+ INTERMEDIATE PRINTOUT:                   YES
+ ESTIMATE OUTPUT TO MSF:                  NO
+ IND. OBJ. FUNC. VALUES SORTED:           NO
+ NUMERICAL DERIVATIVE
+       FILE REQUEST (NUMDER):               NONE
+ MAP (ETAHAT) ESTIMATION METHOD (OPTMAP):   0
+ ETA HESSIAN EVALUATION METHOD (ETADER):    0
+ INITIAL ETA FOR MAP ESTIMATION (MCETA):    0
+ SIGDIGITS FOR MAP ESTIMATION (SIGLO):      100
+ GRADIENT SIGDIGITS OF
+       FIXED EFFECTS PARAMETERS (SIGL):     100
+ NOPRIOR SETTING (NOPRIOR):                 OFF
+ NOCOV SETTING (NOCOV):                     OFF
+ DERCONT SETTING (DERCONT):                 OFF
+ FINAL ETA RE-EVALUATION (FNLETA):          ON
+ EXCLUDE NON-INFLUENTIAL (NON-INFL.) ETAS
+       IN SHRINKAGE (ETASTYPE):             NO
+ NON-INFL. ETA CORRECTION (NONINFETA):      OFF
+ RAW OUTPUT FILE (FILE): run111_nids_18_s1d_c1.ext
+ EXCLUDE TITLE (NOTITLE):                   NO
+ EXCLUDE COLUMN LABELS (NOLABEL):           NO
+ FORMAT FOR ADDITIONAL FILES (FORMAT):      S1PE12.5
+ PARAMETER ORDER FOR OUTPUTS (ORDER):       TSOL
+ WISHART PRIOR DF INTERPRETATION (WISHTYPE):0
+ KNUTHSUMOFF:                               0
+ INCLUDE LNTWOPI:                           NO
+ INCLUDE CONSTANT TERM TO PRIOR (PRIORC):   NO
+ INCLUDE CONSTANT TERM TO OMEGA (ETA) (OLNTWOPI):NO
+ EM OR BAYESIAN METHOD USED:                MCMC BAYESIAN (BAYES)
+ MU MODELING PATTERN (MUM):
+ GRADIENT/GIBBS PATTERN (GRD):
+ AUTOMATIC SETTING FEATURE (AUTO):          OFF
+ CONVERGENCE TYPE (CTYPE):                  3
+ KEEP ITERATIONS (THIN):            1
+ CONVERGENCE INTERVAL (CINTERVAL):          20
+ CONVERGENCE ITERATIONS (CITER):            10
+ CONVERGENCE ALPHA ERROR (CALPHA):          5.000000000000000E-02
+ BURN-IN ITERATIONS (NBURN):                4000
+ ITERATIONS (NITER):                        10000
+ ANEAL SETTING (CONSTRAIN):                 1
+ STARTING SEED FOR MC METHODS (SEED):       56664
+ MC SAMPLES PER SUBJECT (ISAMPLE):          1
+ RANDOM SAMPLING METHOD (RANMETHOD):        3U
+ PROPOSAL DENSITY SCALING RANGE
+              (ISCALE_MIN, ISCALE_MAX):     1.000000000000000E-06   ,1000000.00000000
+ SAMPLE ACCEPTANCE RATE (IACCEPT):          0.400000000000000
+ METROPOLIS HASTINGS SAMPLING FOR INDIVIDUAL ETAS:
+ SAMPLES FOR GLOBAL SEARCH KERNEL (ISAMPLE_M1):          2
+ SAMPLES FOR NEIGHBOR SEARCH KERNEL (ISAMPLE_M1A):       0
+ SAMPLES FOR MASS/IMP/POST. MATRIX SEARCH (ISAMPLE_M1B): 2
+ SAMPLES FOR LOCAL SEARCH KERNEL (ISAMPLE_M2):           2
+ SAMPLES FOR LOCAL UNIVARIATE KERNEL (ISAMPLE_M3):       2
+ PWR. WT. MASS/IMP/POST MATRIX ACCUM. FOR ETAS (IKAPPA): 1.00000000000000
+ MASS/IMP./POST. MATRIX REFRESH SETTING (MASSREST):      -1
+ METROPOLIS HASTINGS POPULATION SAMPLING FOR NON-GIBBS
+ SAMPLED THETAS AND SIGMAS:
+ PROPOSAL DENSITY SCALING RANGE
+              (PSCALE_MIN, PSCALE_MAX):   1.000000000000000E-02   ,1000.00000000000
+ SAMPLE ACCEPTANCE RATE (PACCEPT):                       0.500000000000000
+ SAMPLES FOR GLOBAL SEARCH KERNEL (PSAMPLE_M1):          1
+ SAMPLES FOR LOCAL SEARCH KERNEL (PSAMPLE_M2):           -1
+ SAMPLES FOR LOCAL UNIVARIATE KERNEL (PSAMPLE_M3):       1
+ METROPOLIS HASTINGS POPULATION SAMPLING FOR NON-GIBBS
+ SAMPLED OMEGAS:
+ SAMPLE ACCEPTANCE RATE (OACCEPT):                       0.500000000000000
+ SAMPLES FOR GLOBAL SEARCH KERNEL (OSAMPLE_M1):          -1
+ SAMPLES FOR LOCAL SEARCH KERNEL (OSAMPLE_M2):           -1
+ SAMPLES FOR LOCAL UNIVARIATE SEARCH KERNEL (OSAMPLE_M3):0
+ DEG. FR. FOR T DIST.  PRIOR FOR THETAS (TTDF):        0.00000000000000
+ DEG. FR. FOR LKJ CORRELATION PRIOR FOR OMEGAS (OLKJDF): 0.00000000000000
+ WEIGHT FACTOR FOR STD PRIOR FOR OMEGAS (OVARF): 1.00000000000000
+ DEG. FR. FOR LKJ CORRELATION PRIOR FOR SIGMAS (SLKJDF): 0.00000000000000
+ WEIGHT FACTOR FOR STD PRIOR FOR SIGMAS (SVARF): 1.00000000000000
+
+
+ THE FOLLOWING LABELS ARE EQUIVALENT
+ PRED=PREDI
+ RES=RESI
+ WRES=WRESI
+ IWRS=IWRESI
+ IPRD=IPREDI
+ IRS=IRESI
+
+ EM/BAYES SETUP:
+ THETAS THAT ARE MU MODELED:
+   1   2
+ THETAS THAT ARE GIBBS SAMPLED:
+   1   2
+ THETAS THAT ARE METROPOLIS-HASTINGS SAMPLED:
+ 
+ SIGMAS THAT ARE GIBBS SAMPLED:
+   1
+ SIGMAS THAT ARE METROPOLIS-HASTINGS SAMPLED:
+ 
+ OMEGAS ARE GIBBS SAMPLED
+
+ MONITORING OF SEARCH:
+
+ Burn-in Mode
+ iteration        -4000 MCMCOBJ=    3131110.4439206296     
+ iteration        -3980 MCMCOBJ=    313.32397851151683     
+ iteration        -3960 MCMCOBJ=    310.35167534105602     
+ iteration        -3940 MCMCOBJ=    292.12438511851605     
+ iteration        -3920 MCMCOBJ=    39.815857474449452     
+ iteration        -3900 MCMCOBJ=    56.665301527467633     
+ iteration        -3880 MCMCOBJ=    59.419560644704106     
+ iteration        -3860 MCMCOBJ=    39.938411498936354     
+ iteration        -3840 MCMCOBJ=    68.393050219882326     
+ iteration        -3820 MCMCOBJ=    93.435034272103508     
+ iteration        -3800 MCMCOBJ=    70.384647507008125     
+ iteration        -3780 MCMCOBJ=    43.867280052586793     
+ iteration        -3760 MCMCOBJ=    41.655271864468304     
+ Convergence achieved
+ Sampling Mode
+ iteration            0 MCMCOBJ=    40.820004577526241     
+ iteration           20 MCMCOBJ=    70.799416615475522     
+ iteration           40 MCMCOBJ=    76.261968846602898     
+ iteration           60 MCMCOBJ=    70.875051202921583     
+ iteration           80 MCMCOBJ=    76.491094199248153     
+ iteration          100 MCMCOBJ=    55.943283202828859     
+ iteration          120 MCMCOBJ=    9.6126478789645091     
+ iteration          140 MCMCOBJ=    50.845112916923476     
+ iteration          160 MCMCOBJ=    70.442091822877174     
+ iteration          180 MCMCOBJ=    53.725648303891795     
+ iteration          200 MCMCOBJ=    76.499314439895898     
+ iteration          220 MCMCOBJ=    47.646626863449910     
+ iteration          240 MCMCOBJ=    49.562616854002023     
+ iteration          260 MCMCOBJ=   -10.701082251868396     
+ iteration          280 MCMCOBJ=   -34.029099416258106     
+ iteration          300 MCMCOBJ=    10.848364845383202     
+ iteration          320 MCMCOBJ=    35.654336109017102     
+ iteration          340 MCMCOBJ=    35.293557924622675     
+ iteration          360 MCMCOBJ=    23.206435717870583     
+ iteration          380 MCMCOBJ=    16.884731336622195     
+ iteration          400 MCMCOBJ=    41.196719378844264     
+ iteration          420 MCMCOBJ=    34.168596478208784     
+ iteration          440 MCMCOBJ=    60.680665658727193     
+ iteration          460 MCMCOBJ=    46.814865437783268     
+ iteration          480 MCMCOBJ=    16.790600789196578     
+ iteration          500 MCMCOBJ=    13.408109664699230     
+ iteration          520 MCMCOBJ=    49.544751120753233     
+ iteration          540 MCMCOBJ=    9.4092514319562728     
+ iteration          560 MCMCOBJ=    16.173882093635669     
+ iteration          580 MCMCOBJ=  -0.99809539305329187     
+ iteration          600 MCMCOBJ=    31.978284305384978     
+ iteration          620 MCMCOBJ=    42.006198211627947     
+ iteration          640 MCMCOBJ=   -11.676338004443874     
+ iteration          660 MCMCOBJ=   -24.446177102957844     
+ iteration          680 MCMCOBJ=   -12.068529845074700     
+ iteration          700 MCMCOBJ=    19.991219758745263     
+ iteration          720 MCMCOBJ=    80.313072017506130     
+ iteration          740 MCMCOBJ=    47.936428792022944     
+ iteration          760 MCMCOBJ=    15.318215839153803     
+ iteration          780 MCMCOBJ=    3.5629232172733114     
+ iteration          800 MCMCOBJ=    74.156485501719303     
+ iteration          820 MCMCOBJ=    63.236336965809024     
+ iteration          840 MCMCOBJ=    78.878089949990880     
+ iteration          860 MCMCOBJ=    73.164672851754176     
+ iteration          880 MCMCOBJ=    33.191494260734331     
+ iteration          900 MCMCOBJ=    15.148785514042347     
+ iteration          920 MCMCOBJ=    50.979188358689022     
+ iteration          940 MCMCOBJ=    79.002933127201104     
+ iteration          960 MCMCOBJ=    48.666279967498319     
+ iteration          980 MCMCOBJ=    25.184660261526851     
+ iteration         1000 MCMCOBJ=    61.116807872609883     
+ iteration         1020 MCMCOBJ=    69.834017730492306     
+ iteration         1040 MCMCOBJ=   -6.0060368837498457     
+ iteration         1060 MCMCOBJ=    4.1594728594185906     
+ iteration         1080 MCMCOBJ=    2.3152312606478887E-003
+ iteration         1100 MCMCOBJ=    45.705809660262204     
+ iteration         1120 MCMCOBJ=    66.911169136041607     
+ iteration         1140 MCMCOBJ=    59.656122918172919     
+ iteration         1160 MCMCOBJ=    25.960509900091747     
+ iteration         1180 MCMCOBJ=    83.510642808105530     
+ iteration         1200 MCMCOBJ=    20.021367129814227     
+ iteration         1220 MCMCOBJ=   -6.1953633002880091     
+ iteration         1240 MCMCOBJ=    71.802923535621360     
+ iteration         1260 MCMCOBJ=    62.613593098429050     
+ iteration         1280 MCMCOBJ=    39.329169009768854     
+ iteration         1300 MCMCOBJ=    42.379676603602576     
+ iteration         1320 MCMCOBJ=    3.4608143858954055     
+ iteration         1340 MCMCOBJ=   -16.021447302533023     
+ iteration         1360 MCMCOBJ=  -0.67473487609871896     
+ iteration         1380 MCMCOBJ=   -8.5289886427971702     
+ iteration         1400 MCMCOBJ=   -59.584955956878353     
+ iteration         1420 MCMCOBJ=   -30.113427609418064     
+ iteration         1440 MCMCOBJ=   -60.856065292813206     
+ iteration         1460 MCMCOBJ=    2.6732362177316853     
+ iteration         1480 MCMCOBJ=    3.5604585695880075     
+ iteration         1500 MCMCOBJ=   -22.393664034525287     
+ iteration         1520 MCMCOBJ=   -19.928702309094863     
+ iteration         1540 MCMCOBJ=   -64.835212135646756     
+ iteration         1560 MCMCOBJ=   -104.08967174867355     
+ iteration         1580 MCMCOBJ=   -140.76953699680570     
+ iteration         1600 MCMCOBJ=   -133.79219526331272     
+ iteration         1620 MCMCOBJ=   -115.78552571727096     
+ iteration         1640 MCMCOBJ=   -92.264693864128731     
+ iteration         1660 MCMCOBJ=   -104.45065794325255     
+ iteration         1680 MCMCOBJ=   -144.31631574484837     
+ iteration         1700 MCMCOBJ=   -97.789761716424024     
+ iteration         1720 MCMCOBJ=   -158.98366160933747     
+ iteration         1740 MCMCOBJ=   -202.92220919124642     
+ iteration         1760 MCMCOBJ=   -237.14011913694549     
+ iteration         1780 MCMCOBJ=   -300.54165839805808     
+ iteration         1800 MCMCOBJ=   -298.61137797517222     
+ iteration         1820 MCMCOBJ=   -252.49391297471172     
+ iteration         1840 MCMCOBJ=   -274.00646538453049     
+ iteration         1860 MCMCOBJ=   -286.75700523281506     
+ iteration         1880 MCMCOBJ=   -259.47528974163004     
+ iteration         1900 MCMCOBJ=   -315.26186261313035     
+ iteration         1920 MCMCOBJ=   -260.71181170221138     
+ iteration         1940 MCMCOBJ=   -242.42258640614844     
+ iteration         1960 MCMCOBJ=   -158.47547002877815     
+ iteration         1980 MCMCOBJ=   -211.65217535687557     
+ iteration         2000 MCMCOBJ=   -227.16595422823187     
+ iteration         2020 MCMCOBJ=   -264.93807272166094     
+ iteration         2040 MCMCOBJ=   -312.48163799714189     
+ iteration         2060 MCMCOBJ=   -285.76366489094789     
+ iteration         2080 MCMCOBJ=   -226.10391128357639     
+ iteration         2100 MCMCOBJ=   -195.30332916371714     
+ iteration         2120 MCMCOBJ=   -207.12803100701089     
+ iteration         2140 MCMCOBJ=   -170.89128057768650     
+ iteration         2160 MCMCOBJ=   -239.65214505381792     
+ iteration         2180 MCMCOBJ=   -243.30735723705260     
+ iteration         2200 MCMCOBJ=   -185.26738840735524     
+ iteration         2220 MCMCOBJ=   -185.96716280349284     
+ iteration         2240 MCMCOBJ=   -133.92537621319090     
+ iteration         2260 MCMCOBJ=   -84.462350435748590     
+ iteration         2280 MCMCOBJ=   -74.904347239990457     
+ iteration         2300 MCMCOBJ=   -1.4831522595889859     
+ iteration         2320 MCMCOBJ=    13.810275434173414     
+ iteration         2340 MCMCOBJ=    35.424117560264065     
+ iteration         2360 MCMCOBJ=    68.477860110998748     
+ iteration         2380 MCMCOBJ=    75.095651460287868     
+ iteration         2400 MCMCOBJ=    67.992743590411735     
+ iteration         2420 MCMCOBJ=    91.021582865540807     
+ iteration         2440 MCMCOBJ=    97.538542967490628     
+ iteration         2460 MCMCOBJ=    86.944456447884889     
+ iteration         2480 MCMCOBJ=    66.814857654182362     
+ iteration         2500 MCMCOBJ=    7.1726612805784677     
+ iteration         2520 MCMCOBJ=    32.847069790836919     
+ iteration         2540 MCMCOBJ=    61.235114258857280     
+ iteration         2560 MCMCOBJ=    62.278770721363905     
+ iteration         2580 MCMCOBJ=    92.549559279630074     
+ iteration         2600 MCMCOBJ=    49.716809232374018     
+ iteration         2620 MCMCOBJ=    42.923918225185503     
+ iteration         2640 MCMCOBJ=    55.585148400302018     
+ iteration         2660 MCMCOBJ=    52.346961255855433     
+ iteration         2680 MCMCOBJ=    77.009851830537912     
+ iteration         2700 MCMCOBJ=    53.604673492550518     
+ iteration         2720 MCMCOBJ=    72.802403307599107     
+ iteration         2740 MCMCOBJ=    34.058408162025984     
+ iteration         2760 MCMCOBJ=   -47.056529227367285     
+ iteration         2780 MCMCOBJ=   -15.812894753850319     
+ iteration         2800 MCMCOBJ=    32.207585732877689     
+ iteration         2820 MCMCOBJ=    44.053282789455871     
+ iteration         2840 MCMCOBJ=    66.948515301368218     
+ iteration         2860 MCMCOBJ=    46.604265503988735     
+ iteration         2880 MCMCOBJ=    52.323010799646049     
+ iteration         2900 MCMCOBJ=    47.118138894266131     
+ iteration         2920 MCMCOBJ=    43.336339221109874     
+ iteration         2940 MCMCOBJ=    35.220248606669259     
+ iteration         2960 MCMCOBJ=    46.435848759512460     
+ iteration         2980 MCMCOBJ=    75.256364938542262     
+ iteration         3000 MCMCOBJ=    55.268509821987948     
+ iteration         3020 MCMCOBJ=    38.873281471248312     
+ iteration         3040 MCMCOBJ=    51.817510040986868     
+ iteration         3060 MCMCOBJ=    46.271255079143366     
+ iteration         3080 MCMCOBJ=    59.423946210624834     
+ iteration         3100 MCMCOBJ=    62.564857208239040     
+ iteration         3120 MCMCOBJ=   -5.5836503438625007     
+ iteration         3140 MCMCOBJ=   -11.778572851752958     
+ iteration         3160 MCMCOBJ=   -20.105138049387744     
+ iteration         3180 MCMCOBJ=   -53.618304401727450     
+ iteration         3200 MCMCOBJ=   -21.848066355998757     
+ iteration         3220 MCMCOBJ=    32.476832665245034     
+ iteration         3240 MCMCOBJ=   -24.596376397518021     
+ iteration         3260 MCMCOBJ=   -61.077648718620438     
+ iteration         3280 MCMCOBJ=   -66.196922359604912     
+ iteration         3300 MCMCOBJ=   -44.723901969509022     
+ iteration         3320 MCMCOBJ=   -50.150510292978765     
+ iteration         3340 MCMCOBJ=   -79.997360010752800     
+ iteration         3360 MCMCOBJ=   -6.2034649503853663     
+ iteration         3380 MCMCOBJ=    34.489298843593133     
+ iteration         3400 MCMCOBJ=   -30.175076932095351     
+ iteration         3420 MCMCOBJ=    9.9660298720159890     
+ iteration         3440 MCMCOBJ=   -20.905721015715159     
+ iteration         3460 MCMCOBJ=   -49.718822656444424     
+ iteration         3480 MCMCOBJ=   -17.216101963277065     
+ iteration         3500 MCMCOBJ=   -12.468344994427504     
+ iteration         3520 MCMCOBJ=    46.719650140658494     
+ iteration         3540 MCMCOBJ=    37.498887349175014     
+ iteration         3560 MCMCOBJ=   -15.192843081697808     
+ iteration         3580 MCMCOBJ=    31.627055484065728     
+ iteration         3600 MCMCOBJ=    58.489614007807674     
+ iteration         3620 MCMCOBJ=    38.707513425587976     
+ iteration         3640 MCMCOBJ=    49.978367545838942     
+ iteration         3660 MCMCOBJ=    49.821282942084771     
+ iteration         3680 MCMCOBJ=    32.771667731289369     
+ iteration         3700 MCMCOBJ=    62.306514530004058     
+ iteration         3720 MCMCOBJ=    10.332396040523898     
+ iteration         3740 MCMCOBJ=   -31.458401941163544     
+ iteration         3760 MCMCOBJ=   -68.050589001177698     
+ iteration         3780 MCMCOBJ=    27.383667691782531     
+ iteration         3800 MCMCOBJ=    12.553318948771386     
+ iteration         3820 MCMCOBJ=   -57.722519487122845     
+ iteration         3840 MCMCOBJ=   -93.823948770127771     
+ iteration         3860 MCMCOBJ=   -71.875542436366786     
+ iteration         3880 MCMCOBJ=   -114.16423142183453     
+ iteration         3900 MCMCOBJ=   -134.18373404505513     
+ iteration         3920 MCMCOBJ=   -197.36834488648981     
+ iteration         3940 MCMCOBJ=   -160.80535334755936     
+ iteration         3960 MCMCOBJ=   -219.24625971605801     
+ iteration         3980 MCMCOBJ=   -195.50928098340358     
+ iteration         4000 MCMCOBJ=   -281.45393549297961     
+ iteration         4020 MCMCOBJ=   -314.43487598160198     
+ iteration         4040 MCMCOBJ=   -293.03171642294922     
+ iteration         4060 MCMCOBJ=   -204.43148547585579     
+ iteration         4080 MCMCOBJ=   -129.16286094082849     
+ iteration         4100 MCMCOBJ=   -166.14793387197992     
+ iteration         4120 MCMCOBJ=   -112.24407169103975     
+ iteration         4140 MCMCOBJ=   -82.162445317957193     
+ iteration         4160 MCMCOBJ=   -107.62449195693176     
+ iteration         4180 MCMCOBJ=   -157.18864222687469     
+ iteration         4200 MCMCOBJ=   -192.49092913465842     
+ iteration         4220 MCMCOBJ=   -243.49968936860083     
+ iteration         4240 MCMCOBJ=   -223.87608341839365     
+ iteration         4260 MCMCOBJ=   -300.62729978617728     
+ iteration         4280 MCMCOBJ=   -340.27963974014784     
+ iteration         4300 MCMCOBJ=   -266.02517591255827     
+ iteration         4320 MCMCOBJ=   -321.14797071763735     
+ iteration         4340 MCMCOBJ=   -406.28116408627886     
+ iteration         4360 MCMCOBJ=   -376.51329830834635     
+ iteration         4380 MCMCOBJ=   -300.47862237961647     
+ iteration         4400 MCMCOBJ=   -315.60427291016538     
+ iteration         4420 MCMCOBJ=   -340.88453611151664     
+ iteration         4440 MCMCOBJ=   -280.23521265642751     
+ iteration         4460 MCMCOBJ=   -267.78203347262507     
+ iteration         4480 MCMCOBJ=   -285.15238448295628     
+ iteration         4500 MCMCOBJ=   -304.42688010330062     
+ iteration         4520 MCMCOBJ=   -377.74368059495521     
+ iteration         4540 MCMCOBJ=   -398.43551083835524     
+ iteration         4560 MCMCOBJ=   -421.86944391614065     
+ iteration         4580 MCMCOBJ=   -460.01334858542452     
+ iteration         4600 MCMCOBJ=   -452.12518208440787     
+ iteration         4620 MCMCOBJ=   -439.06738245569306     
+ iteration         4640 MCMCOBJ=   -424.09036646764787     
+ iteration         4660 MCMCOBJ=   -413.97667988283558     
+ iteration         4680 MCMCOBJ=   -350.34801603438945     
+ iteration         4700 MCMCOBJ=   -390.63538778652378     
+ iteration         4720 MCMCOBJ=   -416.32951136388675     
+ iteration         4740 MCMCOBJ=   -397.26425037485370     
+ iteration         4760 MCMCOBJ=   -346.01635891126580     
+ iteration         4780 MCMCOBJ=   -342.26614933426066     
+ iteration         4800 MCMCOBJ=   -354.86487159554963     
+ iteration         4820 MCMCOBJ=   -363.19471628224517     
+ iteration         4840 MCMCOBJ=   -325.97031103399752     
+ iteration         4860 MCMCOBJ=   -228.68927551634661     
+ iteration         4880 MCMCOBJ=   -255.19873334691306     
+ iteration         4900 MCMCOBJ=   -231.02356557464063     
+ iteration         4920 MCMCOBJ=   -160.16305827369629     
+ iteration         4940 MCMCOBJ=   -140.86490338424247     
+ iteration         4960 MCMCOBJ=   -137.69643975298627     
+ iteration         4980 MCMCOBJ=   -219.60942201362215     
+ iteration         5000 MCMCOBJ=   -272.81178892497462     
+ iteration         5020 MCMCOBJ=   -273.54600864673654     
+ iteration         5040 MCMCOBJ=   -277.38023662311866     
+ iteration         5060 MCMCOBJ=   -217.86017723402290     
+ iteration         5080 MCMCOBJ=   -188.08268197896669     
+ iteration         5100 MCMCOBJ=   -155.38472596786343     
+ iteration         5120 MCMCOBJ=   -156.54404552719140     
+ iteration         5140 MCMCOBJ=   -200.27854038080579     
+ iteration         5160 MCMCOBJ=   -196.94545684808642     
+ iteration         5180 MCMCOBJ=   -135.17173125649506     
+ iteration         5200 MCMCOBJ=   -199.33226754512063     
+ iteration         5220 MCMCOBJ=   -228.94753303497879     
+ iteration         5240 MCMCOBJ=   -226.04488602933435     
+ iteration         5260 MCMCOBJ=   -236.44250645345252     
+ iteration         5280 MCMCOBJ=   -228.20103229350113     
+ iteration         5300 MCMCOBJ=   -264.97639200817270     
+ iteration         5320 MCMCOBJ=   -203.11487970874103     
+ iteration         5340 MCMCOBJ=   -163.02918219159486     
+ iteration         5360 MCMCOBJ=   -168.65545018195485     
+ iteration         5380 MCMCOBJ=   -210.57972825453811     
+ iteration         5400 MCMCOBJ=   -157.40128564913815     
+ iteration         5420 MCMCOBJ=   -137.71766735619491     
+ iteration         5440 MCMCOBJ=   -182.53720569600361     
+ iteration         5460 MCMCOBJ=   -191.73711509180774     
+ iteration         5480 MCMCOBJ=   -102.25129741279004     
+ iteration         5500 MCMCOBJ=   -89.951075092880984     
+ iteration         5520 MCMCOBJ=   -147.86455529299764     
+ iteration         5540 MCMCOBJ=   -92.901434232347285     
+ iteration         5560 MCMCOBJ=   -201.23319832886131     
+ iteration         5580 MCMCOBJ=   -209.35788435785173     
+ iteration         5600 MCMCOBJ=   -246.34259292263465     
+ iteration         5620 MCMCOBJ=   -209.00545282156858     
+ iteration         5640 MCMCOBJ=   -208.46666155440531     
+ iteration         5660 MCMCOBJ=   -201.47035637550448     
+ iteration         5680 MCMCOBJ=   -201.91754137207081     
+ iteration         5700 MCMCOBJ=   -153.50142447380017     
+ iteration         5720 MCMCOBJ=   -172.41182769098293     
+ iteration         5740 MCMCOBJ=   -112.40268126620474     
+ iteration         5760 MCMCOBJ=   -124.84377461030054     
+ iteration         5780 MCMCOBJ=   -86.005736557041899     
+ iteration         5800 MCMCOBJ=   -16.642472305969690     
+ iteration         5820 MCMCOBJ=    2.3519497368210982     
+ iteration         5840 MCMCOBJ=   -48.963256599500774     
+ iteration         5860 MCMCOBJ=   -36.922808989240025     
+ iteration         5880 MCMCOBJ=   -78.115188679694072     
+ iteration         5900 MCMCOBJ=   -54.286103346289515     
+ iteration         5920 MCMCOBJ=   -23.784784294014056     
+ iteration         5940 MCMCOBJ=   -33.658947384511293     
+ iteration         5960 MCMCOBJ=   -56.846681920782437     
+ iteration         5980 MCMCOBJ=   -77.801287632279880     
+ iteration         6000 MCMCOBJ=   -19.683761861952988     
+ iteration         6020 MCMCOBJ=    61.294483901318635     
+ iteration         6040 MCMCOBJ=    49.843856611575610     
+ iteration         6060 MCMCOBJ=    44.647740689773343     
+ iteration         6080 MCMCOBJ=    46.441266131076034     
+ iteration         6100 MCMCOBJ=    77.841353103903302     
+ iteration         6120 MCMCOBJ=    102.96767969842900     
+ iteration         6140 MCMCOBJ=    72.216152176697463     
+ iteration         6160 MCMCOBJ=    52.075422927012475     
+ iteration         6180 MCMCOBJ=    52.320943626471468     
+ iteration         6200 MCMCOBJ=    57.953823003431580     
+ iteration         6220 MCMCOBJ=    18.388954838447802     
+ iteration         6240 MCMCOBJ=    44.919855748297906     
+ iteration         6260 MCMCOBJ=   -63.248730103485137     
+ iteration         6280 MCMCOBJ=   -30.318313533576163     
+ iteration         6300 MCMCOBJ=   -93.953313447201438     
+ iteration         6320 MCMCOBJ=   -100.79564130116908     
+ iteration         6340 MCMCOBJ=   -126.34678949021927     
+ iteration         6360 MCMCOBJ=   -162.34399823137701     
+ iteration         6380 MCMCOBJ=   -152.73388660320592     
+ iteration         6400 MCMCOBJ=   -114.22000135423957     
+ iteration         6420 MCMCOBJ=   -94.065461642587550     
+ iteration         6440 MCMCOBJ=   -129.17505903415270     
+ iteration         6460 MCMCOBJ=   -150.54911003507118     
+ iteration         6480 MCMCOBJ=   -91.950186445550941     
+ iteration         6500 MCMCOBJ=   -90.056644414159237     
+ iteration         6520 MCMCOBJ=   -25.135184963981331     
+ iteration         6540 MCMCOBJ=    13.134024913144495     
+ iteration         6560 MCMCOBJ=    13.643364940015058     
+ iteration         6580 MCMCOBJ=    14.674440468019371     
+ iteration         6600 MCMCOBJ=    34.206792040048335     
+ iteration         6620 MCMCOBJ=   -8.7736552764408930     
+ iteration         6640 MCMCOBJ=   -64.011832967881446     
+ iteration         6660 MCMCOBJ=    10.621535122431505     
+ iteration         6680 MCMCOBJ=   -42.093637413964679     
+ iteration         6700 MCMCOBJ=   -136.16913735241417     
+ iteration         6720 MCMCOBJ=   -158.74100715283282     
+ iteration         6740 MCMCOBJ=   -116.20897393789254     
+ iteration         6760 MCMCOBJ=   -125.91812537890128     
+ iteration         6780 MCMCOBJ=   -136.59446329633965     
+ iteration         6800 MCMCOBJ=   -140.91831234276589     
+ iteration         6820 MCMCOBJ=   -141.61574904899419     
+ iteration         6840 MCMCOBJ=   -115.44068088726549     
+ iteration         6860 MCMCOBJ=   -67.328236586406987     
+ iteration         6880 MCMCOBJ=   -81.552760604863948     
+ iteration         6900 MCMCOBJ=   -64.709705189795457     
+ iteration         6920 MCMCOBJ=   -38.588485233393307     
+ iteration         6940 MCMCOBJ=    31.088762592085317     
+ iteration         6960 MCMCOBJ=    41.799436546381543     
+ iteration         6980 MCMCOBJ=    64.396527759399760     
+ iteration         7000 MCMCOBJ=    78.427251748030784     
+ iteration         7020 MCMCOBJ=    35.388757550726439     
+ iteration         7040 MCMCOBJ=    61.598177088854541     
+ iteration         7060 MCMCOBJ=    29.139774857912407     
+ iteration         7080 MCMCOBJ=    69.888274793004982     
+ iteration         7100 MCMCOBJ=    16.946599406676782     
+ iteration         7120 MCMCOBJ=    19.525147359290756     
+ iteration         7140 MCMCOBJ=    29.841147735760700     
+ iteration         7160 MCMCOBJ=   -39.353289600545963     
+ iteration         7180 MCMCOBJ=    25.756241726391195     
+ iteration         7200 MCMCOBJ=    22.526238748788444     
+ iteration         7220 MCMCOBJ=    19.950502580759284     
+ iteration         7240 MCMCOBJ=    43.938590075614016     
+ iteration         7260 MCMCOBJ=    65.207810604255954     
+ iteration         7280 MCMCOBJ=    35.802100236141015     
+ iteration         7300 MCMCOBJ=    36.847319887493811     
+ iteration         7320 MCMCOBJ=    59.230522287453148     
+ iteration         7340 MCMCOBJ=    44.857105804640064     
+ iteration         7360 MCMCOBJ=    79.368518581782880     
+ iteration         7380 MCMCOBJ=    76.389749542622440     
+ iteration         7400 MCMCOBJ=    66.697874954237733     
+ iteration         7420 MCMCOBJ=    38.294702909370720     
+ iteration         7440 MCMCOBJ=    41.590569078989063     
+ iteration         7460 MCMCOBJ=    49.998834546573164     
+ iteration         7480 MCMCOBJ=    57.247550763333400     
+ iteration         7500 MCMCOBJ=    83.389466578573789     
+ iteration         7520 MCMCOBJ=    47.917498494101913     
+ iteration         7540 MCMCOBJ=    39.918926531069637     
+ iteration         7560 MCMCOBJ=    85.080077512450444     
+ iteration         7580 MCMCOBJ=    29.781920921832906     
+ iteration         7600 MCMCOBJ=   -64.150809588156292     
+ iteration         7620 MCMCOBJ=   -85.747735420448365     
+ iteration         7640 MCMCOBJ=   -34.214091785489344     
+ iteration         7660 MCMCOBJ=   -12.611642547823381     
+ iteration         7680 MCMCOBJ=   -15.369469975324547     
+ iteration         7700 MCMCOBJ=   -33.669550842839463     
+ iteration         7720 MCMCOBJ=   -55.298154086869367     
+ iteration         7740 MCMCOBJ=   -50.430777065325429     
+ iteration         7760 MCMCOBJ=   -58.272612422803128     
+ iteration         7780 MCMCOBJ=   -21.184830184982875     
+ iteration         7800 MCMCOBJ=   -25.309076771219271     
+ iteration         7820 MCMCOBJ=   -69.381778350513386     
+ iteration         7840 MCMCOBJ=   0.56120749693750516     
+ iteration         7860 MCMCOBJ=   -9.4121986343765265     
+ iteration         7880 MCMCOBJ=   -31.399341437389381     
+ iteration         7900 MCMCOBJ=    48.427804658384346     
+ iteration         7920 MCMCOBJ=    43.376707849883822     
+ iteration         7940 MCMCOBJ=    63.649851894769903     
+ iteration         7960 MCMCOBJ=    33.335357699770476     
+ iteration         7980 MCMCOBJ=    87.187492389666147     
+ iteration         8000 MCMCOBJ=    17.923601021630734     
+ iteration         8020 MCMCOBJ=    16.587125522975594     
+ iteration         8040 MCMCOBJ=    34.416626425028376     
+ iteration         8060 MCMCOBJ=    27.796564162751643     
+ iteration         8080 MCMCOBJ=    58.767311513061863     
+ iteration         8100 MCMCOBJ=    65.515654093994030     
+ iteration         8120 MCMCOBJ=    51.773744739590363     
+ iteration         8140 MCMCOBJ=    47.545714682437790     
+ iteration         8160 MCMCOBJ=    82.179291014052055     
+ iteration         8180 MCMCOBJ=    77.113728973268422     
+ iteration         8200 MCMCOBJ=    81.296676866137446     
+ iteration         8220 MCMCOBJ=    62.095759855715315     
+ iteration         8240 MCMCOBJ=    47.867414615295132     
+ iteration         8260 MCMCOBJ=    62.800555739535199     
+ iteration         8280 MCMCOBJ=    32.717196529775386     
+ iteration         8300 MCMCOBJ=    54.003402346664657     
+ iteration         8320 MCMCOBJ=    30.870404778602857     
+ iteration         8340 MCMCOBJ=    25.700036355073649     
+ iteration         8360 MCMCOBJ=   -21.903301282784245     
+ iteration         8380 MCMCOBJ=    33.792333776313022     
+ iteration         8400 MCMCOBJ=    26.549796837186033     
+ iteration         8420 MCMCOBJ=   -20.669345799908555     
+ iteration         8440 MCMCOBJ=   -6.4486224027520507     
+ iteration         8460 MCMCOBJ=   -31.470954337766162     
+ iteration         8480 MCMCOBJ=    44.627444552526391     
+ iteration         8500 MCMCOBJ=    29.393382613511889     
+ iteration         8520 MCMCOBJ=    83.685809657081379     
+ iteration         8540 MCMCOBJ=    55.465739335332010     
+ iteration         8560 MCMCOBJ=    36.798564922961830     
+ iteration         8580 MCMCOBJ=    18.987309217205425     
+ iteration         8600 MCMCOBJ=   -12.397465091415468     
+ iteration         8620 MCMCOBJ=    48.816317805940059     
+ iteration         8640 MCMCOBJ=    26.145178829302033     
+ iteration         8660 MCMCOBJ=    42.691083955072799     
+ iteration         8680 MCMCOBJ=    59.580172728971505     
+ iteration         8700 MCMCOBJ=    60.798702352137902     
+ iteration         8720 MCMCOBJ=    16.454636822807036     
+ iteration         8740 MCMCOBJ=    15.273112172320779     
+ iteration         8760 MCMCOBJ=   -18.712035484668981     
+ iteration         8780 MCMCOBJ=   -29.067138811783842     
+ iteration         8800 MCMCOBJ=   -32.284914161566974     
+ iteration         8820 MCMCOBJ=   -18.528127449709537     
+ iteration         8840 MCMCOBJ=   -11.833846273526632     
+ iteration         8860 MCMCOBJ=   -6.3929904929460886     
+ iteration         8880 MCMCOBJ=   -25.482475544795964     
+ iteration         8900 MCMCOBJ=   -27.767548842803524     
+ iteration         8920 MCMCOBJ=   -12.497185743858797     
+ iteration         8940 MCMCOBJ=   -36.012871615994520     
+ iteration         8960 MCMCOBJ=   -27.334102155362597     
+ iteration         8980 MCMCOBJ=   -58.369786786054824     
+ iteration         9000 MCMCOBJ=   -67.934513808271561     
+ iteration         9020 MCMCOBJ=   -86.870155116012967     
+ iteration         9040 MCMCOBJ=   -78.838713634030825     
+ iteration         9060 MCMCOBJ=   -55.326373034466080     
+ iteration         9080 MCMCOBJ=   -119.50415670710095     
+ iteration         9100 MCMCOBJ=   -127.66489217044420     
+ iteration         9120 MCMCOBJ=   -201.46674262743284     
+ iteration         9140 MCMCOBJ=   -187.43887732800334     
+ iteration         9160 MCMCOBJ=   -193.32638793166669     
+ iteration         9180 MCMCOBJ=   -168.23000845528685     
+ iteration         9200 MCMCOBJ=   -204.65909935841319     
+ iteration         9220 MCMCOBJ=   -266.06915390482158     
+ iteration         9240 MCMCOBJ=   -353.30818180893414     
+ iteration         9260 MCMCOBJ=   -362.48724169125313     
+ iteration         9280 MCMCOBJ=   -321.00648707653164     
+ iteration         9300 MCMCOBJ=   -269.03775302284515     
+ iteration         9320 MCMCOBJ=   -276.27412544458059     
+ iteration         9340 MCMCOBJ=   -370.98982891560280     
+ iteration         9360 MCMCOBJ=   -303.73572952401423     
+ iteration         9380 MCMCOBJ=   -374.93109645138213     
+ iteration         9400 MCMCOBJ=   -405.13996049963004     
+ iteration         9420 MCMCOBJ=   -404.35862659324255     
+ iteration         9440 MCMCOBJ=   -414.70204177569383     
+ iteration         9460 MCMCOBJ=   -394.76575234696463     
+ iteration         9480 MCMCOBJ=   -385.29047442172873     
+ iteration         9500 MCMCOBJ=   -308.04307121893640     
+ iteration         9520 MCMCOBJ=   -278.71476690290461     
+ iteration         9540 MCMCOBJ=   -235.70401085150436     
+ iteration         9560 MCMCOBJ=   -295.66543346143504     
+ iteration         9580 MCMCOBJ=   -313.79099889230241     
+ iteration         9600 MCMCOBJ=   -371.33181874318421     
+ iteration         9620 MCMCOBJ=   -399.69169693028465     
+ iteration         9640 MCMCOBJ=   -474.60502627462097     
+ iteration         9660 MCMCOBJ=   -459.57510776650719     
+ iteration         9680 MCMCOBJ=   -491.63060396958736     
+ iteration         9700 MCMCOBJ=   -436.75793972744577     
+ iteration         9720 MCMCOBJ=   -470.55702560457672     
+ iteration         9740 MCMCOBJ=   -430.08412451316269     
+ iteration         9760 MCMCOBJ=   -443.16852494885478     
+ iteration         9780 MCMCOBJ=   -400.44505783677693     
+ iteration         9800 MCMCOBJ=   -350.91830750383201     
+ iteration         9820 MCMCOBJ=   -371.65665374913470     
+ iteration         9840 MCMCOBJ=   -392.55146727344152     
+ iteration         9860 MCMCOBJ=   -370.30692946930674     
+ iteration         9880 MCMCOBJ=   -353.94292654325841     
+ iteration         9900 MCMCOBJ=   -335.29672174712067     
+ iteration         9920 MCMCOBJ=   -325.90433788003696     
+ iteration         9940 MCMCOBJ=   -362.99034682903340     
+ iteration         9960 MCMCOBJ=   -354.45223507479704     
+ iteration         9980 MCMCOBJ=   -251.94934008736587     
+ iteration        10000 MCMCOBJ=   -224.79807399707485     
+ BURN-IN WAS COMPLETED
+
+ #TERM:
+ STATISTICAL PORTION WAS COMPLETED
+  
+ TOTAL DATA POINTS NORMALLY DISTRIBUTED (N):           36
+ N*LOG(2PI) CONSTANT TO OBJECTIVE FUNCTION:    66.163574390736429     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:   -85.993694223875295     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:      -19.830119833138866     
+ REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
+  
+ TOTAL EFFECTIVE ETAS (NIND*NETA):                            36
+ NIND*NETA*LOG(2PI) CONSTANT TO OBJECTIVE FUNCTION:    66.163574390736429     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:   -85.993694223875295     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:      -19.830119833138866     
+ REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
+  
+ PRIOR CONSTANT TO OBJECTIVE FUNCTION:    30.823646298206345     
+ OBJECTIVE FUNCTION VALUE WITHOUT CONSTANT:   -85.993694223875295     
+ OBJECTIVE FUNCTION VALUE WITH CONSTANT:      -55.170047925668953     
+ REPORTED OBJECTIVE FUNCTION DOES NOT CONTAIN CONSTANT
+  
+ #TERE:
+ Elapsed estimation  time in seconds:    22.38
+ Elapsed covariance  time in seconds:     0.00
+1
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                              MCMC BAYESIAN ANALYSIS                            ********************
+ #OBJT:**************                       AVERAGE VALUE OF LIKELIHOOD FUNCTION                     ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+ 
+
+
+
+
+
+ #OBJV:********************************************      -85.994       **************************************************
+ #OBJS:********************************************      148.258 (STD) **************************************************
+1
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                              MCMC BAYESIAN ANALYSIS                            ********************
+ ********************                             FINAL PARAMETER ESTIMATE                           ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+ 
+
+
+ THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
+
+
+         THETA(CL) THETA(V) 
+ 
+         3.66E+00  3.55E+01
+ 
+
+
+ OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+
+
+         ETA(CL)   ETA(V)   
+ 
+ ETA(CL)
++        1.68E-01
+ 
+ ETA(V)
++        2.64E-02  8.86E-02
+ 
+
+
+ SIGMA - COV MATRIX FOR RANDOM EFFECTS - EPSILONS  ****
+
+
+         EPS1     
+ 
+ EPS1
++        7.55E-03
+ 
+1
+
+
+ OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
+
+
+         ETA(CL)   ETA(V)   
+ 
+ ETA(CL)
++        4.03E-01
+ 
+ ETA(V)
++        2.14E-01  2.93E-01
+ 
+
+
+ SIGMA - CORR MATRIX FOR RANDOM EFFECTS - EPSILONS  ***
+
+
+         EPS1     
+ 
+ EPS1
++        5.84E-02
+ 
+1
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                              MCMC BAYESIAN ANALYSIS                            ********************
+ ********************                STANDARD ERROR OF ESTIMATE (From Sample Variance)               ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+ 
+
+
+ THETA - VECTOR OF FIXED EFFECTS PARAMETERS   *********
+
+
+         THETA(CL) THETA(V) 
+ 
+         3.69E-01  2.66E+00
+ 
+
+
+ OMEGA - COV MATRIX FOR RANDOM EFFECTS - ETAS  ********
+
+
+         ETA(CL)   ETA(V)   
+ 
+ ETA(CL)
++        6.80E-02
+ 
+ ETA(V)
++        3.35E-02  3.49E-02
+ 
+
+
+ SIGMA - COV MATRIX FOR RANDOM EFFECTS - EPSILONS  ****
+
+
+         EPS1     
+ 
+ EPS1
++        1.34E-02
+ 
+1
+
+
+ OMEGA - CORR MATRIX FOR RANDOM EFFECTS - ETAS  *******
+
+
+         ETA(CL)   ETA(V)   
+ 
+ ETA(CL)
++        7.80E-02
+ 
+ ETA(V)
++        2.29E-01  5.48E-02
+ 
+
+
+ SIGMA - CORR MATRIX FOR RANDOM EFFECTS - EPSILONS  ***
+
+
+         EPS1     
+ 
+ EPS1
++        6.44E-02
+ 
+1
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                              MCMC BAYESIAN ANALYSIS                            ********************
+ ********************               COVARIANCE MATRIX OF ESTIMATE (From Sample Variance)             ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+ 
+
+            TH 1      TH 2      OM11      OM12      OM22      SG11  
+ 
+ TH 1
++        1.36E-01
+ 
+ TH 2
++        1.87E-01  7.07E+00
+ 
+ OM11
++       -4.74E-04  4.54E-04  4.63E-03
+ 
+ OM12
++        3.50E-04 -1.07E-03  6.47E-04  1.12E-03
+ 
+ OM22
++       -1.97E-04 -9.14E-04  3.35E-04  3.35E-04  1.22E-03
+ 
+ SG11
++       -2.13E-04  2.15E-03 -2.37E-04 -1.61E-05 -4.98E-05  1.81E-04
+ 
+1
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                              MCMC BAYESIAN ANALYSIS                            ********************
+ ********************              CORRELATION MATRIX OF ESTIMATE (From Sample Variance)             ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+ 
+
+            TH 1      TH 2      OM11      OM12      OM22      SG11  
+ 
+ TH 1
++        3.69E-01
+ 
+ TH 2
++        1.91E-01  2.66E+00
+ 
+ OM11
++       -1.89E-02  2.51E-03  6.80E-02
+ 
+ OM12
++        2.84E-02 -1.20E-02  2.84E-01  3.35E-02
+ 
+ OM22
++       -1.53E-02 -9.84E-03  1.41E-01  2.87E-01  3.49E-02
+ 
+ SG11
++       -4.30E-02  6.01E-02 -2.59E-01 -3.58E-02 -1.06E-01  1.34E-02
+ 
+1
+ ************************************************************************************************************************
+ ********************                                                                                ********************
+ ********************                              MCMC BAYESIAN ANALYSIS                            ********************
+ ********************           INVERSE COVARIANCE MATRIX OF ESTIMATE (From Sample Variance)         ********************
+ ********************                                                                                ********************
+ ************************************************************************************************************************
+ 
+
+            TH 1      TH 2      OM11      OM12      OM22      SG11  
+ 
+ TH 1
++        7.69E+00
+ 
+ TH 2
++       -2.08E-01  1.48E-01
+ 
+ OM11
++        1.97E+00 -1.88E-01  2.53E+02
+ 
+ OM12
++       -4.22E+00  2.96E-01 -1.37E+02  1.05E+03
+ 
+ OM22
++        2.29E+00 -4.38E-02 -1.86E+01 -2.58E+02  9.04E+02
+ 
+ SG11
++        1.44E+01 -2.23E+00  3.19E+02 -1.65E+02  2.05E+02  6.04E+03
+ 
+ Elapsed postprocess time in seconds:     0.00
+ #CPUT: Total CPU Time in Seconds,       16.969
+Stop Time: 
+Tue 01/03/2017 
+10:26 PM
