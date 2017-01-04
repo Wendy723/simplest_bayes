@@ -53,7 +53,7 @@ kable(scenario_df)
 ```
 
 ```{r}
-modt <- read_file("../modeling/run100c.modt")
+modt <- read_file("../modeling/rundir_001/run100c.modt")
 variables_requested(modt)
 ```
 
@@ -114,7 +114,9 @@ infuse_scenario <- function(row,
     
     readr::write_file(
         infused_template,
-        file.path("..", "modeling", 
+        file.path("..", 
+                  "modeling", 
+                  "rundir_001",
                   generate_file_name(row$scenario_num, 
                                      row$nids, 
                                      row$scenario, 
@@ -137,7 +139,7 @@ infuse_scenario(scenario_df %>% slice(1L),
 Create the scenario template files
 
 ```{r}
-# by_row(scenario_df, infuse_scenario, modt, sample_times_rich, sparser_scenarios)
+by_row(scenario_df, infuse_scenario, modt, sample_times_rich, sparser_scenarios)
 ```
 
 ## output data
