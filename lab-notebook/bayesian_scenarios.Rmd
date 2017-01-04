@@ -45,7 +45,10 @@ create_scenarios <- function(nids, scenario_list, n_chains, base_num = 1) {
 ```
 
 ```{r}
-scenario_df <- create_scenarios(c(9, 18, 36, 56), sparser_scenarios, 4, 101) 
+NIDS <- c(9, 18, 36, 56)
+NCHAINS <- 4
+START_RUN <- 101
+scenario_df <- create_scenarios(NIDS, sparser_scenarios, NCHAINS, START_RUN) 
 kable(scenario_df)
 ```
 
@@ -72,21 +75,45 @@ generate_file_name <- function(scenario_num, nids, scenario, chain) {
            ".mod")
 }
 
-infuse_scenario <- function(row, all_obs_times, all_scenarios, .seed = 1234567) {
+infuse_scenario <- function(row, 
+                            modt, 
+                            all_obs_times, 
+                            all_scenarios, 
+                            .seed = 1234567,
+                            .strict = TRUE,
+                            .return = FALSE) {
     set.seed(.seed)
     if (is.null(all_scenarios[[row$scenario]])) {
        stop(paste0("unidentified scenario detected with params: ", row, collapse = ", "))
     }
     ignore_obs <- setdiff(1:length(all_obs_times), all_scenarios[[row$scenario]])
-    ignore <- paste0("IGNORE=(OBSNUM.EQN.", ignore_obs, ")", collapse = " ")
-    readr::write_file(
-        infuser::infuse(modt, 
+    ignore <- paste0("IGNORE=(OBSNUM.EQN.", ignore_obs, ")", collapse = "\n")
+    ignore_ids <- paste0("IGNORE=(ID.GT.", row$nids, ")")
+    all_ignore <- paste(ignore, ignore_ids, sep = "\n")
+    infuse_params <- list(
                nids = row$nids,
                scenario = row$scenario,
-               ignore = ignore,
+               ignore = all_ignore,
                chain_number = row$chain, 
                seed = round(runif(1, 1000, 100000), 0)
-               ), 
+    )
+    
+    # check all params matched
+    if (.strict) {
+        necessary_params <- infuser::variables_requested(modt)
+        param_diff <- setdiff(names(necessary_params), names(infuse_params))
+        if(!!length(param_diff)) {
+            stop(paste("missing params from the template:", 
+                       param_diff, 
+                       collapse = ", ")
+                 )
+        }
+    }
+    
+    infused_template <- infuser::infuse(modt, infuse_params)
+    
+    readr::write_file(
+        infused_template,
         file.path("..", "modeling", 
                   generate_file_name(row$scenario_num, 
                                      row$nids, 
@@ -94,13 +121,23 @@ infuse_scenario <- function(row, all_obs_times, all_scenarios, .seed = 1234567) 
                                      row$chain)
                   )
         )
+    if(.return) {
+       return(infused_template) 
+    }
+    invisible()
 }
+
+infuse_scenario(scenario_df %>% slice(1L),
+                modt,
+                sample_times_rich,
+                sparser_scenarios
+                )
 ```
 
 Create the scenario template files
 
 ```{r}
-by_row(scenario_df, infuse_scenario, sample_times_rich, sparser_scenarios)
+# by_row(scenario_df, infuse_scenario, modt, sample_times_rich, sparser_scenarios)
 ```
 
 ## output data
