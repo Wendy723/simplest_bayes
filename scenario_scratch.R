@@ -1,4 +1,4 @@
-library(Satchel)
+library(satchel)
 satchel <- Satchel$new("visualize", "data/derived/satchel/")
 
 available_files <- satchel$available()
