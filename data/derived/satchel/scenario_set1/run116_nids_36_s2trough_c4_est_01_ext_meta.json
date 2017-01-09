@@ -1,0 +1,97 @@
+{
+  "info": [
+    {
+      "name": "run116_nids_36_s2trough_c4_est_01_ext",
+      "classes": "tbl_df, tbl, data.frame",
+      "size_mb": 0.0942
+    }
+  ],
+  "json_preview": [
+    {
+      "ITERATION": 0,
+      "CL": 2.6038,
+      "V": 32.1448,
+      "RV": 0.0431,
+      "nCL": 0.0955,
+      "nCL_nV": -0.0404,
+      "nV": 0.3808,
+      "MCMCOBJ": 161.8514,
+      "chain": 4,
+      "runno": 116,
+      "nids": 36,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 10,
+      "CL": 2.7036,
+      "V": 29.5512,
+      "RV": 0.0249,
+      "nCL": 0.1451,
+      "nCL_nV": -0.0623,
+      "nV": 0.1736,
+      "MCMCOBJ": 112.0276,
+      "chain": 4,
+      "runno": 116,
+      "nids": 36,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 20,
+      "CL": 3.4369,
+      "V": 37.677,
+      "RV": 0.0459,
+      "nCL": 0.0854,
+      "nCL_nV": -0.0094,
+      "nV": 0.2052,
+      "MCMCOBJ": 158.193,
+      "chain": 4,
+      "runno": 116,
+      "nids": 36,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 30,
+      "CL": 2.9242,
+      "V": 40.1985,
+      "RV": 0.0296,
+      "nCL": 0.1468,
+      "nCL_nV": -0.0191,
+      "nV": 0.0394,
+      "MCMCOBJ": 88.9254,
+      "chain": 4,
+      "runno": 116,
+      "nids": 36,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 40,
+      "CL": 3.1262,
+      "V": 39.3011,
+      "RV": 0.0359,
+      "nCL": 0.2006,
+      "nCL_nV": -0.0277,
+      "nV": 0.1232,
+      "MCMCOBJ": 150.855,
+      "chain": 4,
+      "runno": 116,
+      "nids": 36,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 50,
+      "CL": 3.1854,
+      "V": 37.4154,
+      "RV": 0.0306,
+      "nCL": 0.1273,
+      "nCL_nV": -0.0175,
+      "nV": 0.0662,
+      "MCMCOBJ": 126.6683,
+      "chain": 4,
+      "runno": 116,
+      "nids": 36,
+      "scenario": "s2trough"
+    }
+  ],
+  "r_preview": ["{\"type\":\"list\",\"attributes\":{\"names\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"ITERATION\",\"CL\",\"V\",\"RV\",\"nCL\",\"nCL_nV\",\"nV\",\"MCMCOBJ\",\"chain\",\"runno\",\"nids\",\"scenario\"]},\"row.names\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1,2,3,4,5,6]},\"class\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"tbl_df\",\"tbl\",\"data.frame\"]}},\"value\":[{\"type\":\"integer\",\"attributes\":{},\"value\":[0,10,20,30,40,50]},{\"type\":\"double\",\"attributes\":{},\"value\":[2.60379,2.70358,3.4369,2.92417,3.12617,3.18542]},{\"type\":\"double\",\"attributes\":{},\"value\":[32.1448,29.5512,37.677,40.1985,39.3011,37.4154]},{\"type\":\"double\",\"attributes\":{},\"value\":[0.0430841,0.0248969,0.0458571,0.0296012,0.0359278,0.0306339]},{\"type\":\"double\",\"attributes\":{},\"value\":[0.0955032,0.145134,0.0854465,0.146833,0.200598,0.127315]},{\"type\":\"double\",\"attributes\":{},\"value\":[-0.0404124,-0.0623222,-0.00937767,-0.0191448,-0.0276745,-0.0174728]},{\"type\":\"double\",\"attributes\":{},\"value\":[0.380827,0.173573,0.20519,0.0394114,0.12317,0.066152]},{\"type\":\"double\",\"attributes\":{},\"value\":[161.85137265,112.02757533,158.19303762,88.92536572,150.85498651,126.66829673]},{\"type\":\"double\",\"attributes\":{},\"value\":[4,4,4,4,4,4]},{\"type\":\"double\",\"attributes\":{},\"value\":[116,116,116,116,116,116]},{\"type\":\"double\",\"attributes\":{},\"value\":[36,36,36,36,36,36]},{\"type\":\"character\",\"attributes\":{},\"value\":[\"s2trough\",\"s2trough\",\"s2trough\",\"s2trough\",\"s2trough\",\"s2trough\"]}]}"],
+  "time": ["2017-01-03 23:08:43"]
+}

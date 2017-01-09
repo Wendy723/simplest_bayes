@@ -1,0 +1,73 @@
+{
+  "info": [
+    {
+      "name": "run109_nids_18_r1d_c1_est_01",
+      "classes": "tbl_df, tbl, data.frame",
+      "size_mb": 1.0827
+    }
+  ],
+  "json_preview": [
+    {
+      "ITERATION": 0,
+      "ID": 1,
+      "CL": 2.0704,
+      "V": 34.768,
+      "chain": 1,
+      "runno": 109,
+      "nids": 18,
+      "scenario": "r1d"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 2,
+      "CL": 2.8575,
+      "V": 22.625,
+      "chain": 1,
+      "runno": 109,
+      "nids": 18,
+      "scenario": "r1d"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 3,
+      "CL": 4.2803,
+      "V": 58.017,
+      "chain": 1,
+      "runno": 109,
+      "nids": 18,
+      "scenario": "r1d"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 4,
+      "CL": 3.8136,
+      "V": 41.241,
+      "chain": 1,
+      "runno": 109,
+      "nids": 18,
+      "scenario": "r1d"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 5,
+      "CL": 4.0202,
+      "V": 36.711,
+      "chain": 1,
+      "runno": 109,
+      "nids": 18,
+      "scenario": "r1d"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 6,
+      "CL": 3.3543,
+      "V": 30.047,
+      "chain": 1,
+      "runno": 109,
+      "nids": 18,
+      "scenario": "r1d"
+    }
+  ],
+  "r_preview": ["{\"type\":\"list\",\"attributes\":{\"names\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"ITERATION\",\"ID\",\"CL\",\"V\",\"chain\",\"runno\",\"nids\",\"scenario\"]},\"row.names\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1,2,3,4,5,6]},\"class\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"tbl_df\",\"tbl\",\"data.frame\"]}},\"value\":[{\"type\":\"integer\",\"attributes\":{},\"value\":[0,0,0,0,0,0]},{\"type\":\"double\",\"attributes\":{},\"value\":[1,2,3,4,5,6]},{\"type\":\"double\",\"attributes\":{},\"value\":[2.0704,2.8575,4.2803,3.8136,4.0202,3.3543]},{\"type\":\"double\",\"attributes\":{},\"value\":[34.768,22.625,58.017,41.241,36.711,30.047]},{\"type\":\"double\",\"attributes\":{},\"value\":[1,1,1,1,1,1]},{\"type\":\"double\",\"attributes\":{},\"value\":[109,109,109,109,109,109]},{\"type\":\"double\",\"attributes\":{},\"value\":[18,18,18,18,18,18]},{\"type\":\"character\",\"attributes\":{},\"value\":[\"r1d\",\"r1d\",\"r1d\",\"r1d\",\"r1d\",\"r1d\"]}]}"],
+  "time": ["2017-01-03 22:50:52"]
+}

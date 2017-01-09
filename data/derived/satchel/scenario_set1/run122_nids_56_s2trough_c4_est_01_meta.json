@@ -1,0 +1,73 @@
+{
+  "info": [
+    {
+      "name": "run122_nids_56_s2trough_c4_est_01",
+      "classes": "tbl_df, tbl, data.frame",
+      "size_mb": 3.365
+    }
+  ],
+  "json_preview": [
+    {
+      "ITERATION": 0,
+      "ID": 1,
+      "CL": 3.1382,
+      "V": 27.979,
+      "chain": 4,
+      "runno": 122,
+      "nids": 56,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 2,
+      "CL": 1.9789,
+      "V": 55.658,
+      "chain": 4,
+      "runno": 122,
+      "nids": 56,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 3,
+      "CL": 4.9022,
+      "V": 45.031,
+      "chain": 4,
+      "runno": 122,
+      "nids": 56,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 4,
+      "CL": 2.0659,
+      "V": 59.141,
+      "chain": 4,
+      "runno": 122,
+      "nids": 56,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 5,
+      "CL": 3.8001,
+      "V": 69.868,
+      "chain": 4,
+      "runno": 122,
+      "nids": 56,
+      "scenario": "s2trough"
+    },
+    {
+      "ITERATION": 0,
+      "ID": 6,
+      "CL": 4.0469,
+      "V": 63.845,
+      "chain": 4,
+      "runno": 122,
+      "nids": 56,
+      "scenario": "s2trough"
+    }
+  ],
+  "r_preview": ["{\"type\":\"list\",\"attributes\":{\"names\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"ITERATION\",\"ID\",\"CL\",\"V\",\"chain\",\"runno\",\"nids\",\"scenario\"]},\"row.names\":{\"type\":\"integer\",\"attributes\":{},\"value\":[1,2,3,4,5,6]},\"class\":{\"type\":\"character\",\"attributes\":{},\"value\":[\"tbl_df\",\"tbl\",\"data.frame\"]}},\"value\":[{\"type\":\"integer\",\"attributes\":{},\"value\":[0,0,0,0,0,0]},{\"type\":\"double\",\"attributes\":{},\"value\":[1,2,3,4,5,6]},{\"type\":\"double\",\"attributes\":{},\"value\":[3.1382,1.9789,4.9022,2.0659,3.8001,4.0469]},{\"type\":\"double\",\"attributes\":{},\"value\":[27.979,55.658,45.031,59.141,69.868,63.845]},{\"type\":\"double\",\"attributes\":{},\"value\":[4,4,4,4,4,4]},{\"type\":\"double\",\"attributes\":{},\"value\":[122,122,122,122,122,122]},{\"type\":\"double\",\"attributes\":{},\"value\":[56,56,56,56,56,56]},{\"type\":\"character\",\"attributes\":{},\"value\":[\"s2trough\",\"s2trough\",\"s2trough\",\"s2trough\",\"s2trough\",\"s2trough\"]}]}"],
+  "time": ["2017-01-03 22:51:02"]
+}
