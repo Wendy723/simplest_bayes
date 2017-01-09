@@ -1,6 +1,5 @@
 # derived values should be able to be regenerated from original data
 # and other outputs, therefore we should not need to track for a given project
-*
 
 
 # some derived files we do want to keep around, for example specific modeling output
@@ -8,4 +7,4 @@
 # repository size more manageable. These files can be dumped into the track folder
 !.gitignore
 !track
-!satchel/scenario_set1
+!satchel
