@@ -1,10 +1,10 @@
 # derived values should be able to be regenerated from original data
 # and other outputs, therefore we should not need to track for a given project
-
+*.rds
 
 # some derived files we do want to keep around, for example specific modeling output
 # however given the large nature, storing as a compressed binary object can keep the
 # repository size more manageable. These files can be dumped into the track folder
 !.gitignore
 !track
-!satchel
+!satchel/*
