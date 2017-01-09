@@ -8,3 +8,4 @@
 # repository size more manageable. These files can be dumped into the track folder
 !.gitignore
 !track
+!satchel/scenario_set1
