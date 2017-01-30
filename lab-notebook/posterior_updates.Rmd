@@ -1,0 +1,47 @@
+# Posterior acceptance
+
+Once the posterior is generated, there are a number of key components that need
+to be addressed to use as a prior for incoming data.
+
+The first opportunity to influence the interaction of data and the new prior
+is to evaluate the credibility of the prior variance for the theta distribution.
+As the variance of the theta parameters is increased, the final theta estimates 
+will be drawn more towards the data, whereas shrinking the prior variance will
+cause the data to have less influence over the theta values. In a population context,
+this may be important if there is concern over exploring a new population where
+you have a small amount of data.
+
+In this case, as the objective is to investigate the individual bayes estimates
+not necessarily adjust the population typical parameter values, it is vital to explore
+how data influences the typical values, and derived individual parameter distributions.
+
+The second opportunity is through control over the degrees of freedom of the omega 
+(inverse wishart) distribution. 
+
+The tricky part, is we are not concerned with the overall posterior, just the posterior
+of the individual parameter values for the given individual being predicted. At this
+time, it is uncertain as to the influence of the prior distributions on the estimation
+of _individual_ clearance and volume distributions.
+
+This is an important distinction to make, as ...
+
+
+To better understand the impact of such changes on individual parameter estimates a 'grid' 
+of scenarios will be generated, using the following:
+
+* the posterior generated from rich data from 56 individuals
+* the posterior generated from 1 day of sampling from 16 individuals 
+* an artifically inflated posterior to 1.5x variance of 16 individual estimate
+
+Likewise, the degrees of freedom of both the omega, and sigma matrices will be adjusted to
+
+* OMEGAPD = 20 (weak), 50% # inds, # inds, 2x #inds (strong)
+* OMEGAPD = 20 (weak), 50% # obs, # obs, 2x #obs (strong)
+
+These choices are purely for hypothesis generating, however must be framed under the umbrella of 
+eventually using this intuition to develop a posterior with the attributes desireable
+for (moderately conservative) individual dose optimization.
+
+
+
+
