@@ -1,0 +1,87 @@
+# impact of dispersion (DF) on individual parameter estimates
+
+```{r}
+library(tidyverse)
+library(infuser)
+```
+
+```{r }
+read_nm <- function(.file) {
+    data.table::fread(.file, skip = 1)
+}
+
+extract_lower <- function(.omega) {
+    if (length(.omega) == 1) {
+        return(list(.omega))
+    }
+    lower_tri <- lower.tri(.omega, diag = T)
+    lapply(1:nrow(.omega), function(i){
+        .omega[i, ][lower_tri[i, ]]
+    })
+}
+
+collapse_to_lower <- function(.omega, fix = TRUE) {
+    lower_list <- extract_lower(.omega)
+    if (fix) {
+        lower_list[[1]] <- paste(lower_list[[1]], "FIX")
+    }
+    paste(lapply(lower_list, 
+                 paste, collapse = " "), 
+          collapse = "\n ")
+}
+
+#' @param run run name
+#' @param pv_sf prior variance scaling factor - defaults to 1 but can increase or decrease prior variance
+process_run <- function(run, pv_sf = 1) {
+    ex_ext <- read_nm(paste0(run, ".ext")) %>% filter(ITERATION == -1000000000)
+    
+    # get the parameter values to use as initial estimates for each structure,
+    # and convert the parameter sets that are lower triangular matrices to 
+    # that format
+    tv_theta <- ex_ext %>% select(contains("THETA"))
+    tv_omega <- mrgsolve::as_bmat(ex_ext %>% select(contains("OMEGA")))[[1]] 
+    tv_sigma <- mrgsolve::as_bmat(ex_ext %>% select(contains("SIGMA")))[[1]]
+    
+    cov_mat <- read_nm(paste0(run, ".cov")) %>% select(-NAME) 
+    nm_cov_mat <- names(cov_mat)
+    cov_mat <- as.matrix(cov_mat)
+   
+    # get the prior variance for theta  
+    theta_pv <- collapse_to_lower(cov_mat[theta_indices, theta_indices]*pv_sf)
+   
+    # the priors for omega and sigma are the same as the tv's, however
+    # must also add FIX
+    return(list(
+        theta = paste("(0.001, ", tv_theta, ")", collapse = "\n"),
+        omega = collapse_to_lower(tv_omega, fix = FALSE),
+        sigma = collapse_to_lower(tv_sigma, fix = FALSE),
+        thetap = paste(tv_theta, "FIX", collapse = "\n"),
+        thetapv = theta_pv,
+        omegap = collapse_to_lower(tv_omega),
+        sigmap = paste(tv_sigma, "FIX", collapse = "\n")
+    ))
+}
+```
+
+
+```{r }
+test_infuse <- read_file("../modeling/rundir_002/run000.modt")
+infuser::variables_requested(test_infuse)
+```
+
+```{r }
+run115 <- process_run("../modeling/rundir_001/run115_nids_36_r1d_c1")
+
+all_scenario_info <- expand.grid(SIGMAPD = c(20, 100, 500, 1000, 10000),
+                                  OMEGAPD = c(3, 20, 100, 500),
+                                  chain_number = 1:4,
+                                  data = "ind_01.csv") %>%
+    as_tibble %>% 
+    mutate(scenario = paste0("ODF_", OMEGAPD, "_SDF_", SIGMAPD),
+           seed = round(runif(n(), 10000, 100000), 0)) %>%
+    arrange(scenario) 
+all_scenario_info %>% slice(1L) %>%
+    by_row(function(scenario_info) {
+        print(infuse(test_infuse, c(PKPDmisc::capitalize_names(run115), scenario_info)))
+    }, .collate = "list", .labels = F) 
+```
