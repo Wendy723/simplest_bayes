@@ -43,5 +43,19 @@ eventually using this intuition to develop a posterior with the attributes desir
 for (moderately conservative) individual dose optimization.
 
 
+## Thoughts
+
+* Initially, letting the theta/omega be fit as well likely does not make sense, essentially 
+we want to resample from a stationary heirarchical distribution, and only find
+the posterior of the hyper parameter
 
 
+* on further evaluation, by setting the dispersin factors for sigma and
+omega to moderately informative (10-50) we see that by fixing thetas,
+it collapses the tails a little, however the bulk of the distribution is
+similar. On the other hand, by not fixing, the final estimates of 
+theta and omega are completely unreasonable, eg V estimates of 1E15. 
+
+
+At this point it brings up the question, of, given reasonable individual parameter estimates, is there reason for concern on how the population
+posteriors are so numerically unfeasible.
