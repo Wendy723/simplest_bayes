@@ -3,6 +3,8 @@
 ```{r}
 library(tidyverse)
 library(infuser)
+library(PKPDmisc)
+library(future)
 ```
 
 ```{r }
@@ -10,6 +12,7 @@ read_nm <- function(.file) {
     data.table::fread(.file, skip = 1)
 }
 
+# extract the lower matrix into a list of rows
 extract_lower <- function(.omega) {
     if (length(.omega) == 1) {
         return(list(.omega))
@@ -20,6 +23,8 @@ extract_lower <- function(.omega) {
     })
 }
 
+# collapse a matrix to a string representing the lower triangular matrix, 
+# optionally with fix on the first element, which is required for priors 
 collapse_to_lower <- function(.omega, fix = TRUE) {
     lower_list <- extract_lower(.omega)
     if (fix) {
@@ -31,7 +36,7 @@ collapse_to_lower <- function(.omega, fix = TRUE) {
 }
 
 #' @param run run name
-#' @param pv_sf prior variance scaling factor - defaults to 1 but can increase or decrease prior variance
+#' @param pv_sf prior variance scaling factor - defaults to 1 but can increase or decrease prior variance on theta
 process_run <- function(run, pv_sf = 1) {
     ex_ext <- read_nm(paste0(run, ".ext")) %>% filter(ITERATION == -1000000000)
     
@@ -45,10 +50,10 @@ process_run <- function(run, pv_sf = 1) {
     cov_mat <- read_nm(paste0(run, ".cov")) %>% select(-NAME) 
     nm_cov_mat <- names(cov_mat)
     cov_mat <- as.matrix(cov_mat)
-   
+    theta_indices <- which(grepl("THETA", nm_cov_mat))
+    
     # get the prior variance for theta  
     theta_pv <- collapse_to_lower(cov_mat[theta_indices, theta_indices]*pv_sf)
-   
     # the priors for omega and sigma are the same as the tv's, however
     # must also add FIX
     return(list(
@@ -64,24 +69,67 @@ process_run <- function(run, pv_sf = 1) {
 ```
 
 
+## Influence of dispersion factor (DF) on sigma and omega, for purposes of estimation
+
+Parameter values are taken from the 36 and 56 individual fits, in which the estimated
+values are similar, however, the prior variance on theta and omega is such that
+the 56 individual group has approximately 2x the variance. 
+
+In combination with tweaking the dispersion factors, this should give some indication
+of the relative contributions of dispersion factor vs prior variance, leading to 
+more targeted efforts on which parameters to tune to optimize the behavior for
+the priors to balance incoming data for an individual, against prior knowledge.
+
+
 ```{r }
-test_infuse <- read_file("../modeling/rundir_002/run000.modt")
-infuser::variables_requested(test_infuse)
+run113 <- process_run("../modeling/rundir_001/run113_nids_36_s2d_c1")
+run119 <- process_run("../modeling/rundir_001/run119_nids_56_s2d_c1")
 ```
 
-```{r }
-run115 <- process_run("../modeling/rundir_001/run115_nids_36_r1d_c1")
 
+## Parameters to replace
+
+```{r }
+template_mod <- read_file("../modeling/rundir_002/run000.modt")
+infuser::variables_requested(template_mod)
+```
+
+
+```{r }
+START_RUNNUM <- 0 # will be added to index, so this will start at run001
 all_scenario_info <- expand.grid(SIGMAPD = c(20, 100, 500, 1000, 10000),
                                   OMEGAPD = c(3, 20, 100, 500),
-                                  chain_number = 1:4,
-                                  data = "ind_01.csv") %>%
+                                  data = paste0("ind_", pad_left(1:56, 2), ".csv"),
+                                 ignore = " ") %>%
     as_tibble %>% 
     mutate(scenario = paste0("ODF_", OMEGAPD, "_SDF_", SIGMAPD),
            seed = round(runif(n(), 10000, 100000), 0)) %>%
-    arrange(scenario) 
-all_scenario_info %>% slice(1L) %>%
+    arrange(data, scenario) %>%
+    group_by(data) %>%
+    mutate(runnum = 1:n())
+plan(multiprocess)
+res <- all_scenario_info %>% 
     by_row(function(scenario_info) {
-        print(infuse(test_infuse, c(PKPDmisc::capitalize_names(run115), scenario_info)))
+        ind_dir <- file.path("..", 
+                  "modeling", 
+                  "rundir_002", 
+                  tools::file_path_sans_ext(scenario_info$data))
+        if (!dir.exists(ind_dir)) {
+            dir.create(ind_dir)
+        }
+        runname <- paste0("run", pad_left(scenario_info$runnum, 3), "_", scenario_info$scenario)
+        write_lines(infuse(template_mod, c(PKPDmisc::capitalize_names(run113), scenario_info)),
+                              file.path(ind_dir, paste0(runname, ".mod"))
+                              )
     }, .collate = "list", .labels = F) 
 ```
+
+## individual data
+
+```{r}
+all_data <- read_nonmem("../modeling/mdata/simple_nocovar_56id_6tp_md.csv")
+
+res <- all_data %>% split(.$ID) %>%
+    map(~ write_nonmem(., file.path("..", "modeling", "mdata", paste0("ind_", pad_left(unique(.$ID), 2), ".csv")))) 
+```
+
