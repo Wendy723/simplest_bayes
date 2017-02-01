@@ -1,0 +1,58 @@
+# evaluation of impact of dispersion (DF) on individual parameter estimates
+
+```{r}
+library(tidyverse)
+library(PKPDmisc)
+library(future)
+library(satchel)
+library(stringr)
+```
+
+# example individual
+
+```{r}
+inddir <- normalizePath(list.dirs("../modeling/rundir_002/ind_28/", recursive = F))
+
+indsatchel <- Satchel$new("ind_01", "../data/derived/satchel/")
+```
+
+```{r }
+info_regex <- "run(\\d+)_ODF_(\\d+)_SDF_(\\d+)_(.+)_est_\\d+"
+ind_scenario_df <- map_df(str_match_all(basename(inddir), info_regex),
+       ~ data_frame(
+        runname = .[, 1],
+        runnum = as_numeric(.[, 2]),
+        ODF = as_numeric(.[, 3]),
+        SDF = as_numeric(.[, 4]),
+        scenario = .[, 5]
+       )) %>% mutate(runpath = inddir)
+ind_scenario_df
+```
+
+```{r}
+res <- by_row(ind_scenario_df, function(row) {
+    ind_df <- data.table::fread(file.path(row$runpath, "fort.50"))
+    names(ind_df) <- c("ITERATION", "ID", "CL", "V")
+    ind_df
+})
+
+ind_params <- res %>% unnest() %>% filter(scenario != "s2trough")
+
+# ind_params%>% filter(scena)
+#     group_by(ODF, SDF, scenario) %>% summarize(meanCL = mean(CL), meanV = mean(V)) %>%
+#     filter(meanCL < 1.5)
+    
+ind_params %>%
+    ggplot(aes(x = CL)) + 
+    geom_density(aes(fill = scenario), alpha = 0.5) + theme_bw() +
+    facet_grid(ODF~ SDF)
+ind_params %>%
+    ggplot(aes(x = CL)) + 
+    geom_density(aes(fill =interaction(ODF, SDF)), alpha = 0.5) + theme_bw() +
+    facet_wrap(~scenario, ncol = 1)
+# ind_params %>%
+#     ggplot(aes(x = V)) + 
+#     geom_density(aes(fill = scenario), alpha = 0.5) + theme_bw()
+
+```
+
