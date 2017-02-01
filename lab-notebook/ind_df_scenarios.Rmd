@@ -124,7 +124,7 @@ all_scenario_info <- expand.grid(SIGMAPD = c(20, 50, 100, 500, 1000, 10000),
     group_by(data) %>%
     mutate(runnum = 1:n())
 
-res <- all_scenario_info %>% ungroup %>% slice(3L) %>%
+res <- all_scenario_info %>% ungroup %>%
     by_row(function(scenario_info) {
         set.seed(1234567)
         ignore_obs <- setdiff(1:length(sample_times_rich), sparser_scenarios[[scenario_info$sampling]])
