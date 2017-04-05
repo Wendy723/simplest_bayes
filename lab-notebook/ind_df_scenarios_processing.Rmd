@@ -11,7 +11,7 @@ library(stringr)
 # example individual
 
 ```{r}
-inddir <- normalizePath(list.dirs("../modeling/rundir_002/ind_28/", recursive = F))
+inddir <- normalizePath(list.dirs("../modeling/rundir_002/ind_20/", recursive = F))
 
 indsatchel <- Satchel$new("ind_01", "../data/derived/satchel/")
 ```
@@ -38,15 +38,15 @@ res <- by_row(ind_scenario_df, function(row) {
 
 ind_params <- res %>% unnest() %>% filter(scenario != "s2trough")
 
-# ind_params%>% filter(scena)
-#     group_by(ODF, SDF, scenario) %>% summarize(meanCL = mean(CL), meanV = mean(V)) %>%
-#     filter(meanCL < 1.5)
-    
-ind_params %>%
+ind_params%>% 
+    group_by(ODF, SDF, scenario) %>% summarize(meanCL = mean(CL), meanV = mean(V)) %>%
+    filter(meanCL < 1.5)
+     
+ind_params %>% filter(ODF > 20) %>%
     ggplot(aes(x = CL)) + 
     geom_density(aes(fill = scenario), alpha = 0.5) + theme_bw() +
     facet_grid(ODF~ SDF)
-ind_params %>%
+ind_params %>% filter(ODF > 20) %>%
     ggplot(aes(x = CL)) + 
     geom_density(aes(fill =interaction(ODF, SDF)), alpha = 0.5) + theme_bw() +
     facet_wrap(~scenario, ncol = 1)
